@@ -45,9 +45,9 @@ export function PaystackSettingsProvider({ children }: { children: ReactNode }) 
 
       if (!existing) {
         const { error: insertError } = await supabase.from("home_text").insert({
-          hero_title: "ADOB'S IMPORTS HUB",
-          hero_subtitle: "Curated luxury imports, delivered with editorial precision.",
-          about_text: "We source the finest imported pieces for the modern connoisseur.",
+          hero_title: "The Christy Black Art Gallery",
+          hero_subtitle: "Discover original paintings and masterworks by Christy Black.",
+          about_text: "The Christy Black Art Gallery presents a collection of original paintings, created with expressive technique and enduring vision.",
           paystack_enabled: next,
         });
         if (insertError) return { error: insertError.message };

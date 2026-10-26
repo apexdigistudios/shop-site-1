@@ -104,7 +104,7 @@ export default function AdminCategories() {
   }
 
   async function deleteCategory(id: string) {
-    if (!window.confirm("Delete this category? Products linked to it will remain but lose the category tag.")) return;
+    if (!window.confirm("Delete this collection? Artworks linked to it will remain but lose the collection tag.")) return;
     const { error } = await supabase.from("categories").delete().eq("id", id);
     if (error) {
       showToast(error.message, "error");
@@ -121,14 +121,14 @@ export default function AdminCategories() {
     <div>
       <AdminSectionHeader
         emoji="🗂️"
-        title="Categories"
-        subtitle={`${categories.length} categor${categories.length !== 1 ? "ies" : "y"}`}
+        title="Collections"
+        subtitle={`${categories.length} collection${categories.length !== 1 ? "s" : ""}`}
         action={
           <button
             onClick={openNewForm}
             className="flex h-10 items-center rounded-full bg-luxury-black px-5 text-xs uppercase tracking-widest text-pure-white transition-all duration-250 hover:scale-[1.02] dark:bg-dark-accent dark:text-luxury-black"
           >
-            + Add Category
+            + Add Collection
           </button>
         }
       />
@@ -138,10 +138,10 @@ export default function AdminCategories() {
           onSubmit={saveCategory}
           className="mt-6 space-y-4 rounded-2xl border border-border-ash bg-pure-white p-6 transition-theme dark:border-dark-grey dark:bg-dark-grey"
         >
-          <h2 className="font-display text-xl">{form.id ? "Edit Category" : "New Category"}</h2>
+          <h2 className="font-display text-xl">{form.id ? "Edit Collection" : "New Collection"}</h2>
           <input
             className={inputClass}
-            placeholder="Category name"
+            placeholder="Collection name"
             value={form.name}
             onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
           />
@@ -169,7 +169,7 @@ export default function AdminCategories() {
               disabled={saving}
               className="rounded-full bg-luxury-black px-6 py-2.5 text-xs uppercase tracking-widest text-pure-white disabled:opacity-50 dark:bg-pure-white dark:text-luxury-black"
             >
-              {saving ? "Saving..." : "Save Category"}
+              {saving ? "Saving..." : "Save Collection"}
             </button>
             <button
               type="button"
@@ -193,7 +193,7 @@ export default function AdminCategories() {
             ))}
           </div>
         ) : categories.length === 0 ? (
-          <p className="text-sm text-ash-grey">No categories yet. Click &quot;Add Category&quot; to create one.</p>
+          <p className="text-sm text-ash-grey">No collections yet. Click &quot;Add Collection&quot; to create one.</p>
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {categories.map((cat) => (

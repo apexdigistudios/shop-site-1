@@ -19,8 +19,6 @@ export default function ProductPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [wishlistId, setWishlistId] = useState<string | null>(null);
@@ -36,8 +34,6 @@ export default function ProductPage() {
     setLoading(true);
     const { data } = await supabase.from("products").select("*").eq("slug", slug).maybeSingle();
     setProduct((data as Product) || null);
-    setSelectedSize(null);
-    setSelectedColor(null);
     setActiveImage(0);
     setLoading(false);
   }, [slug]);
@@ -75,26 +71,23 @@ export default function ProductPage() {
     }
   }, [product, user]);
 
-  async function handleAddToCart() {
-    if (!product) return;
-    if (product.sizes && product.sizes.length > 0 && !selectedSize) {
-      showToast("Please select a size.", "error");
-      return;
-    }
+  async function handleAddToCart(): Promise<boolean> {
+    if (!product) return false;
     try {
       setBusy(true);
-      await addToCart(product, quantity, selectedSize, selectedColor);
-      showToast("Added to your bag.", "success");
+      await addToCart(product, quantity);
+      showToast("Artwork added to your acquisition bag.", "success");
+      return true;
     } catch (e: any) {
       showToast(e.message || "Could not add to bag.", "error");
+      return false;
     } finally {
       setBusy(false);
     }
   }
 
   async function handleBuyNow() {
-    await handleAddToCart();
-    navigate("/cart");
+    if (await handleAddToCart()) navigate("/cart");
   }
 
   async function toggleWishlist() {
@@ -182,10 +175,8 @@ export default function ProductPage() {
   }
 
   const images = safeImages(product.images);
-  const soldOut = product.stock_status === "out_of_stock";
-  const whatsappMessage = `Hello, I'm interested in "${product.name}" (${formatPrice(product.price)})${
-    selectedSize ? ` - Size: ${selectedSize}` : ""
-  }${selectedColor ? ` - Color: ${selectedColor}` : ""}. Is it available?`;
+  const soldOut = product.availability_status !== "Available" || product.stock_status === "out_of_stock";
+  const whatsappMessage = `Hello, I'm interested in "${product.title || product.name}" by ${product.artist || "Christy Black"} (${formatPrice(product.price)}). Is it available?`;
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
@@ -193,7 +184,7 @@ export default function ProductPage() {
         <div>
           <div className="aspect-[3/4] w-full overflow-hidden rounded-2xl border border-border-ash bg-beige-cream transition-theme dark:border-dark-grey dark:bg-dark-grey">
             <img
-              src={images[activeImage] || "/placeholder.jpg"}
+              src={images[activeImage] || "/artwork-placeholder.svg"}
               alt={product.name}
               className="h-full w-full object-cover"
               loading="lazy"
@@ -222,7 +213,8 @@ export default function ProductPage() {
               New Arrival
             </span>
           )}
-          <h1 className="font-display text-4xl tracking-wide text-luxury-black dark:text-pure-white">{product.name}</h1>
+          <h1 className="font-display text-4xl tracking-wide text-luxury-black dark:text-pure-white">{product.title || product.name}</h1>
+          <p className="mt-2 text-sm text-muted-grey dark:text-dark-muted">By {product.artist || "Christy Black"}</p>
           <div className="mt-3 flex items-center gap-3">
             <span className="text-xl text-luxury-black dark:text-pure-white">{formatPrice(product.price)}</span>
             {product.compare_price && product.compare_price > product.price && (
@@ -231,45 +223,14 @@ export default function ProductPage() {
           </div>
           {product.description && <p className="mt-5 text-sm leading-relaxed text-ash-grey">{product.description}</p>}
 
-          {product.sizes && product.sizes.length > 0 && (
-            <div className="mt-6">
-              <span className="text-xs uppercase tracking-widest text-ash-grey">Size</span>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {product.sizes.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`rounded-full border px-4 py-1.5 text-xs uppercase tracking-widest transition-theme ${
-                      selectedSize === size
-                        ? "border-luxury-black bg-luxury-black text-pure-white dark:border-pure-white dark:bg-pure-white dark:text-luxury-black"
-                        : "border-border-ash text-luxury-black dark:border-dark-grey dark:text-pure-white"
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {product.colors && product.colors.length > 0 && (
-            <div className="mt-6">
-              <span className="text-xs uppercase tracking-widest text-ash-grey">Color</span>
-              <div className="mt-2 flex flex-wrap gap-3">
-                {product.colors.map((color) => (
-                  <button
-                    key={color.name}
-                    onClick={() => setSelectedColor(color.name)}
-                    title={color.name}
-                    className={`h-8 w-8 rounded-full border-2 transition-theme ${
-                      selectedColor === color.name ? "border-luxury-black dark:border-pure-white" : "border-border-ash dark:border-dark-grey"
-                    }`}
-                    style={{ backgroundColor: color.hex }}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+          <dl className="mt-6 grid grid-cols-2 gap-x-4 gap-y-3 border-y border-border-ash py-4 text-sm dark:border-dark-grey">
+            <dt className="text-muted-grey dark:text-dark-muted">Medium</dt>
+            <dd className="text-right text-luxury-black dark:text-dark-text">{product.medium || "Not specified"}</dd>
+            <dt className="text-muted-grey dark:text-dark-muted">Dimensions</dt>
+            <dd className="text-right text-luxury-black dark:text-dark-text">{product.dimensions || "Not specified"}</dd>
+            <dt className="text-muted-grey dark:text-dark-muted">Availability</dt>
+            <dd className="text-right text-luxury-black dark:text-dark-text">{product.availability_status}</dd>
+          </dl>
 
           <div className="mt-6 flex items-center gap-4">
             <span className="text-xs uppercase tracking-widest text-ash-grey">Quantity</span>
@@ -293,14 +254,14 @@ export default function ProductPage() {
               onClick={handleAddToCart}
               className="flex-1 rounded-full bg-luxury-black px-6 py-3.5 text-xs uppercase tracking-[0.2em] text-pure-white transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-40 dark:bg-pure-white dark:text-luxury-black"
             >
-              {soldOut ? "Sold Out" : busy ? "Adding..." : "Add to Bag"}
+              {soldOut ? product.availability_status : busy ? "Adding..." : "Acquire Artwork"}
             </button>
             <button
               disabled={soldOut || busy}
               onClick={handleBuyNow}
               className="flex-1 rounded-full border border-luxury-black px-6 py-3.5 text-xs uppercase tracking-[0.2em] text-luxury-black transition-colors hover:bg-luxury-black hover:text-pure-white disabled:cursor-not-allowed disabled:opacity-40 dark:border-pure-white dark:text-pure-white dark:hover:bg-pure-white dark:hover:text-luxury-black"
             >
-              Buy Now
+              Secure Piece
             </button>
             <button
               onClick={toggleWishlist}

@@ -1,4 +1,4 @@
--- ADOB'S IMPORTS HUB — Supabase schema
+-- The Christy Black Art Gallery — Supabase schema
 -- Run this in the Supabase SQL editor. Also create a public storage bucket named "images".
 
 create extension if not exists "uuid-ossp";
@@ -25,6 +25,11 @@ create table if not exists categories (
 create table if not exists products (
   id uuid primary key default uuid_generate_v4(),
   name text not null,
+  title text,
+  artist text not null default 'Christy Black',
+  medium text,
+  dimensions text,
+  availability_status text not null default 'Available' check (availability_status in ('Available','Reserved','Sold')),
   slug text unique not null,
   description text,
   long_description text,
@@ -41,6 +46,32 @@ create table if not exists products (
   visibility boolean not null default true,
   created_at timestamptz not null default now()
 );
+
+-- Artwork details and compatibility migration for existing product records.
+alter table products add column if not exists title text;
+alter table products add column if not exists artist text not null default 'Christy Black';
+alter table products add column if not exists medium text;
+alter table products add column if not exists dimensions text;
+alter table products add column if not exists availability_status text not null default 'Available';
+update products set title = name where title is null;
+update products
+set availability_status = case
+  when stock_status = 'out_of_stock' then 'Sold'
+  when stock_status = 'preorder' then 'Reserved'
+  else 'Available'
+end
+where availability_status = 'Available' and stock_status <> 'in_stock';
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'products_availability_status_check'
+      and conrelid = 'products'::regclass
+  ) then
+    alter table products add constraint products_availability_status_check
+      check (availability_status in ('Available','Reserved','Sold'));
+  end if;
+end $$;
 
 -- ORDERS ---------------------------------------------------------------
 create table if not exists orders (
@@ -114,9 +145,9 @@ create table if not exists testimonials (
 -- HOME TEXT ---------------------------------------------------------------
 create table if not exists home_text (
   id uuid primary key default uuid_generate_v4(),
-  hero_title text not null default 'ADOB''S IMPORTS HUB',
-  hero_subtitle text not null default 'Curated luxury imports, delivered with editorial precision.',
-  about_text text not null default 'We source the finest imported pieces for the modern connoisseur.',
+  hero_title text not null default 'The Christy Black Art Gallery',
+  hero_subtitle text not null default 'Discover original paintings and masterworks by Christy Black.',
+  about_text text not null default 'The Christy Black Art Gallery presents a collection of original paintings, created with expressive technique and enduring vision.',
   logo_url text,
   paystack_enabled boolean not null default false
 );
@@ -126,8 +157,18 @@ alter table home_text add column if not exists logo_url text;
 alter table home_text add column if not exists paystack_enabled boolean not null default false;
 
 insert into home_text (hero_title, hero_subtitle, about_text)
-select 'ADOB''S IMPORTS HUB', 'Curated luxury imports, delivered with editorial precision.', 'We source the finest imported pieces for the modern connoisseur.'
+select 'The Christy Black Art Gallery', 'Discover original paintings and masterworks by Christy Black.', 'The Christy Black Art Gallery presents a collection of original paintings, created with expressive technique and enduring vision.'
 where not exists (select 1 from home_text);
+
+update home_text
+set hero_title = 'The Christy Black Art Gallery'
+where hero_title = 'ADOB''S IMPORTS HUB';
+update home_text
+set hero_subtitle = 'Discover original paintings and masterworks by Christy Black.'
+where hero_subtitle = 'Curated luxury imports, delivered with editorial precision.';
+update home_text
+set about_text = 'The Christy Black Art Gallery presents a collection of original paintings, created with expressive technique and enduring vision.'
+where about_text = 'We source the finest imported pieces for the modern connoisseur.';
 
 -- ROW LEVEL SECURITY -------------------------------------------------------
 alter table users enable row level security;

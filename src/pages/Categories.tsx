@@ -27,8 +27,8 @@ export default function Categories() {
   return (
     <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8">
       <div className="mb-12 text-center">
-        <h1 className="font-display text-4xl tracking-wide text-luxury-black dark:text-pure-white">Categories</h1>
-        <p className="mt-3 text-sm text-ash-grey">Explore our curated collections.</p>
+        <h1 className="font-display text-4xl tracking-wide text-luxury-black dark:text-pure-white">Collections</h1>
+        <p className="mt-3 text-sm text-ash-grey">Explore collections of paintings and masterworks.</p>
       </div>
 
       {loading ? (

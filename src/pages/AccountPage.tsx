@@ -66,7 +66,7 @@ export default function AccountPage() {
         showToast(error, "error");
         return;
       }
-      showToast("Account created! Welcome to ADOB'S IMPORTS HUB.", "success");
+      showToast("Account created! Welcome to The Christy Black Art Gallery.", "success");
     }
   }
 

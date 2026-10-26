@@ -48,8 +48,8 @@ export default function AdminDashboard() {
   }, []);
 
   const cards = [
-    { emoji: "📦", label: "Total Products", value: stats?.products ?? "—", to: "/admin/products" },
-    { emoji: "🗂️", label: "Total Categories", value: stats?.categories ?? "—", to: "/admin/categories" },
+    { emoji: "🖼️", label: "Total Artworks", value: stats?.products ?? "—", to: "/admin/products" },
+    { emoji: "🗂️", label: "Total Collections", value: stats?.categories ?? "—", to: "/admin/categories" },
     { emoji: "🛒", label: "Total Orders", value: stats?.orders ?? "—", to: "/admin/orders" },
     { emoji: "👥", label: "Total Users", value: stats?.users ?? "—", to: "/admin/users" },
     { emoji: "⭐", label: "Pending Reviews", value: stats?.pendingReviews ?? "—", to: "/admin/reviews" },
@@ -61,7 +61,7 @@ export default function AdminDashboard() {
       <AdminSectionHeader
         emoji="📊"
         title="Dashboard Overview"
-        subtitle="Welcome back. Here's what's happening at ADOB'S IMPORTS HUB."
+        subtitle="Welcome back. Here's what's happening at The Christy Black Art Gallery."
       />
 
       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">

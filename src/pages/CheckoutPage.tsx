@@ -70,8 +70,8 @@ export default function CheckoutPage() {
     return (
       <div className="mx-auto max-w-3xl px-5 py-24">
         <EmptyState
-          title="Your bag is empty"
-          message="Add products to your bag before checking out."
+          title="Your acquisition bag is empty"
+          message="Add artworks to your acquisition bag before checking out."
           action={
             <Link to="/shop" className="mt-2 rounded-full bg-luxury-black px-6 py-2.5 text-xs uppercase tracking-widest text-pure-white dark:bg-pure-white dark:text-luxury-black">
               Shop Now
@@ -110,11 +110,12 @@ export default function CheckoutPage() {
 
     const orderItems: OrderItem[] = items.map((it) => ({
       product_id: it.product_id,
-      name: it.product?.name || "Product",
+      name: it.product?.title || it.product?.name || "Artwork",
+      artist: it.product?.artist || "Christy Black",
+      medium: it.product?.medium || null,
+      dimensions: it.product?.dimensions || null,
       price: it.product?.price || 0,
       quantity: it.quantity,
-      size: it.size,
-      color: it.color,
       image: it.product?.images?.[0] || null,
     }));
 
@@ -162,9 +163,9 @@ export default function CheckoutPage() {
     const orderId = order?.id ? order.id.slice(0, 8).toUpperCase() : "";
 
     const whatsappMessage = [
-      `*ADOB'S IMPORTS HUB — Order #${orderId}*`,
+      `*The Christy Black Art Gallery — Acquisition #${orderId}*`,
       ``,
-      `*Customer Details:*`,
+      `*Collector Details:*`,
       `Name: ${name}`,
       `Phone: ${phone}`,
       `Address: ${address}`,
@@ -178,7 +179,7 @@ export default function CheckoutPage() {
       `Payment Status: ${order?.payment_status === "deposit_paid" ? "Deposit Paid" : "Pending Meetup Payment"}`,
       `Meetup Status: ${(order?.meetup_status ?? "awaiting_meetup").replace("_", " ")}`,
       ``,
-      `Hello, I have placed an order and would like to arrange a meetup for product handover.`,
+      `Hello, I have placed an artwork acquisition and would like to arrange delivery.`,
     ].join("\n");
 
     const whatsappLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappMessage)}`;
@@ -328,7 +329,7 @@ export default function CheckoutPage() {
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
-          <h2 className="text-xs uppercase tracking-widest text-muted-grey dark:text-dark-muted">Delivery Details</h2>
+          <h2 className="text-xs uppercase tracking-widest text-muted-grey dark:text-dark-muted">Acquisition &amp; Delivery Details</h2>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -410,7 +411,7 @@ export default function CheckoutPage() {
           {items.map((it) => (
             <div key={it.id} className="flex justify-between text-sm text-muted-grey dark:text-dark-muted">
               <span className="truncate pr-3">
-                {it.quantity}x {it.product?.name}
+                {it.quantity}x {it.product?.title || it.product?.name}
               </span>
               <span>{formatPrice((it.product?.price || 0) * it.quantity)}</span>
             </div>
@@ -440,7 +441,7 @@ export default function CheckoutPage() {
                 : "Pay 50% Deposit"
               : placingOrder
               ? "Placing Order..."
-              : "Place Order"}
+              : "Confirm Acquisition"}
           </button>
         </div>
       </div>

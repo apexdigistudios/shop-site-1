@@ -71,8 +71,8 @@ export default function Shop() {
   return (
     <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8">
       <div className="mb-10 text-center">
-        <h1 className="font-display text-4xl tracking-wide text-luxury-black dark:text-dark-text">The Shop</h1>
-        <p className="mt-3 text-sm text-muted-grey dark:text-dark-muted">Every piece, curated for the discerning wardrobe.</p>
+        <h1 className="font-display text-4xl tracking-wide text-luxury-black dark:text-dark-text">The Gallery</h1>
+        <p className="mt-3 text-sm text-muted-grey dark:text-dark-muted">Explore original paintings and masterworks from the collection.</p>
       </div>
 
       <div className="mb-10 flex flex-col gap-4 border-y border-soft-grey/40 py-5 dark:border-dark-border sm:flex-row sm:items-center sm:justify-between">
@@ -106,7 +106,7 @@ export default function Shop() {
           <input
             value={search}
             onChange={(e) => updateParam("search", e.target.value)}
-            placeholder="Search products..."
+            placeholder="Search artworks..."
             className="w-44 border-b border-soft-grey/60 bg-transparent py-1.5 text-sm text-luxury-black outline-none placeholder:text-muted-grey dark:border-dark-border dark:text-dark-text sm:w-56"
           />
           <select
@@ -130,11 +130,11 @@ export default function Shop() {
         </div>
       ) : filtered.length === 0 ? (
         <EmptyState
-          title="No products yet"
+          title="No artworks yet"
           message={
             products.length === 0
               ? "Our collection is being curated. Please check back soon."
-              : "No products match your filters. Try adjusting your search."
+              : "No artworks match your filters. Try adjusting your search."
           }
         />
       ) : (

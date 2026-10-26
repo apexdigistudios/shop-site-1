@@ -35,11 +35,11 @@ export default function CategoryPage() {
     return (
       <div className="mx-auto max-w-3xl px-5 py-24">
         <EmptyState
-          title="Category not found"
-          message="This category may have been removed."
+          title="Collection not found"
+          message="This collection may have been removed."
           action={
             <Link to="/categories" className="mt-2 text-xs uppercase tracking-widest text-luxury-black underline dark:text-pure-white">
-              Back to Categories
+              Back to Collections
             </Link>
           }
         />
@@ -55,7 +55,7 @@ export default function CategoryPage() {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-deep-black/90 via-deep-black/30 to-transparent" />
         <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-8 sm:px-8">
-          <h1 className="font-display text-4xl tracking-wide text-pure-white">{category?.name || "Category"}</h1>
+          <h1 className="font-display text-4xl tracking-wide text-pure-white">{category?.name || "Collection"}</h1>
           {category?.description && <p className="mt-2 max-w-xl text-sm text-soft-grey">{category.description}</p>}
         </div>
       </div>
@@ -68,7 +68,7 @@ export default function CategoryPage() {
             ))}
           </div>
         ) : products.length === 0 ? (
-          <EmptyState title="No products yet" message="Products in this category will appear here soon." />
+          <EmptyState title="No artworks yet" message="Artworks in this collection will appear here soon." />
         ) : (
           <div className="grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">
             {products.map((product) => (

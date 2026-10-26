@@ -1,6 +1,6 @@
-# ADOB'S IMPORTS HUB
+# The Christy Black Art Gallery
 
-A premium, minimal, monochrome luxury e-commerce storefront + admin dashboard built with React, TypeScript, Vite, Tailwind CSS, and Supabase.
+A minimalist art gallery storefront and admin portal built with React, TypeScript, Vite, Tailwind CSS, and Supabase.
 
 ## Setup
 
@@ -25,7 +25,7 @@ A premium, minimal, monochrome luxury e-commerce storefront + admin dashboard bu
 
 ## Architecture
 
-- **Frontend ↔ Supabase ↔ Admin** — all product, category, order, cart, wishlist, review, coupon, testimonial, and homepage-text data lives exclusively in Supabase. No mock/demo/local data is used for store content.
+- **Frontend ↔ Supabase ↔ Admin** — artwork, collection, order, cart, wishlist, review, coupon, testimonial, and homepage-text data lives in Supabase. Product records include artwork title, artist, medium, dimensions, and availability (Available / Reserved / Sold).
 - **localStorage** is used ONLY for the light/dark theme preference (`theme` key).
 - Dark/light mode toggle works instantly across every page (storefront + admin) using Tailwind's `dark:` class strategy, persisted to `localStorage`.
 - The header is a fixed glassmorphism bar: visible immediately on the homepage, hidden at the top on all other routes and revealed on scroll.
@@ -34,9 +34,9 @@ A premium, minimal, monochrome luxury e-commerce storefront + admin dashboard bu
 ## Payments
 
 - **Pay 50% Deposit** — online payments via Paystack Mobile Money or card. Set `VITE_PAYSTACK_PUBLIC_KEY` to your Paystack public key. Only 50% of the order total is collected online. After a successful callback, the order is created with `payment_method=paystack_deposit`, `payment_status=deposit_paid`, and `meetup_status=pending`.
-- **Pay on Meetup** — no online payment. The order is created immediately with `payment_method=meetup`, `payment_status=pending_meetup_payment`, `meetup_status=pending`, and `status=pending_payment`, then the customer is redirected to WhatsApp to arrange product handover.
-- Guests can add products to their bag; login is only required at checkout.
+- **Pay on Meetup** — no online payment. The order is created immediately with `payment_method=meetup`, `payment_status=pending_meetup_payment`, `meetup_status=pending`, and `status=pending_payment`, then the customer is redirected to WhatsApp to arrange artwork delivery.
+- Guests can add artworks to their acquisition bag; login is only required at checkout.
 
-## Brand Color System (locked)
+## Gallery Color System
 
-Pure White `#FFFFFF`, Luxury Black `#111111`, Deep Black `#000000`, Ash Grey `#8A8F98`, Soft Grey `#D9D9D9`, Warm Cream `#FCFBFA`, Beige Cream `#F5EFE8`, Border Ash `#D8CDC0`, Dark Grey `#222226`, Alert Red `#E04646`, WhatsApp Green `#25D366`.
+Gallery white `#FAFAFC`, slate-900 `#0F172A`, slate-700 `#334155`, slate-50 `#F8FAFC`, and slate-200 `#E2E8F0`.

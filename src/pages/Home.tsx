@@ -45,34 +45,29 @@ export default function Home() {
   return (
     <div>
       {/* HERO */}
-      <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-luxury-black text-pure-white">
-        <img
-          src="/images/hero.jpg"
-          alt="ADOB'S IMPORTS HUB editorial"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-luxury-black/50 via-luxury-black/40 to-luxury-black/70" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(239,231,218,0.06),_transparent_60%)]" />
+      <section className="relative flex min-h-[calc(100vh-76px)] items-center justify-center overflow-hidden bg-[#fafafc] text-slate-900">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,rgba(226,232,240,0.75),transparent_65%)]" />
+        <div className="absolute inset-x-[12%] top-[14%] h-[72%] border border-slate-200/70" />
         <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
-          <p className="mb-6 text-[11px] uppercase tracking-[0.5em] text-soft-grey/80 animate-fade-up">
-            Est. Editorial Fashion &amp; Imports
+          <p className="mb-6 text-[11px] uppercase tracking-[0.5em] text-slate-600 animate-fade-up">
+            ORIGINAL ARTWORKS BY CHRISTY BLACK
           </p>
-          <h1 className="font-display text-5xl font-medium leading-[1.05] tracking-wide sm:text-6xl md:text-7xl lg:text-8xl animate-fade-up">
-            {homeText?.hero_title || "ADOB'S IMPORTS HUB"}
+          <h1 className="font-display text-5xl font-medium leading-[1.05] tracking-wide text-slate-900 sm:text-6xl md:text-7xl lg:text-8xl animate-fade-up">
+            {homeText?.hero_title || "The Christy Black Art Gallery"}
           </h1>
-          <p className="mx-auto mt-7 max-w-xl text-sm leading-relaxed text-soft-grey/90 sm:text-base animate-fade-up">
-            {homeText?.hero_subtitle || "Curated luxury imports, delivered with editorial precision."}
+          <p className="mx-auto mt-7 max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base animate-fade-up">
+            {homeText?.hero_subtitle || "Discover original paintings and masterworks by Christy Black."}
           </p>
           <div className="mt-12 animate-fade-up">
             <Link
               to="/shop"
-              className="inline-flex h-12 items-center rounded-full bg-luxury-black px-10 text-xs uppercase tracking-[0.3em] text-pure-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.35)] dark:bg-dark-accent dark:text-luxury-black"
+              className="inline-flex h-12 items-center rounded-full bg-slate-900 px-10 text-xs uppercase tracking-[0.3em] text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-slate-700"
             >
-              Shop Now
+              Explore the Collection
             </Link>
           </div>
         </div>
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.35em] text-soft-grey/60">
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.35em] text-slate-500">
           Scroll to Discover
         </div>
       </section>
@@ -85,7 +80,7 @@ export default function Home() {
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-sm leading-relaxed text-muted-grey dark:text-dark-muted sm:text-base">
             {homeText?.about_text ||
-              "We source the finest imported pieces for the modern connoisseur — blending craftsmanship, rarity, and timeless design into every collection."}
+              "The Christy Black Art Gallery presents a collection of original paintings, created with expressive technique and enduring vision."}
           </p>
         </div>
       </section>
@@ -94,7 +89,7 @@ export default function Home() {
       <section className="mx-auto max-w-7xl px-5 py-14 sm:px-8">
         <div className="mb-10 flex items-end justify-between">
           <h2 className="font-display text-3xl tracking-wide text-luxury-black dark:text-dark-text">
-            Shop by Category
+            Explore the Collection
           </h2>
           <Link to="/categories" className="text-xs uppercase tracking-widest text-muted-grey transition-colors duration-200 hover:text-luxury-black dark:text-dark-muted dark:hover:text-dark-text">
             View All
@@ -126,7 +121,7 @@ export default function Home() {
                         <span className="font-display text-base">{cat.name}</span>
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-deep-black/75 via-deep-black/20 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-deep-black/75 via-deep-black/20 to-transparent" />
                     <span className="absolute bottom-4 left-4 font-display text-lg tracking-wide text-pure-white">
                       {cat.name}
                     </span>
@@ -149,12 +144,12 @@ export default function Home() {
           </div>
 
           {!loading && featured.length === 0 ? (
-            <EmptyState title="No products yet" message="Featured products added by the admin will appear here soon." />
+            <EmptyState title="No artworks yet" message="Featured artworks added by the gallery will appear here soon." />
           ) : (
             <div className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-6">
               {loading
                 ? Array.from({ length: 8 }).map((_, i) => (
-                    <div key={i} className="aspect-[3/4] w-full animate-pulse rounded-2xl bg-soft-grey/30 dark:bg-dark-card" />
+                    <div key={i} className="aspect-3/4 w-full animate-pulse rounded-2xl bg-soft-grey/30 dark:bg-dark-card" />
                   ))
                 : featured.map((product) => <ProductCard key={product.id} product={product} />)}
             </div>

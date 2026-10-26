@@ -3,34 +3,33 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* ── Light palette ── */
   --color-pure-white: #FFFFFF;
-  --color-luxury-black: #111111;
-  --color-deep-black: #0E0E0E;
-  --color-ash-grey: #5F5A52;
-  --color-muted-grey: #8A847C;
-  --color-soft-grey: #D9D6D0;
-  --color-warm-cream: #F6F1E8;
-  --color-beige-cream: #EFE7DA;
-  --color-border-ash: #D9D6D0;
+  --color-luxury-black: #0F172A;
+  --color-deep-black: #020617;
+  --color-ash-grey: #334155;
+  --color-muted-grey: #64748B;
+  --color-soft-grey: #E2E8F0;
+  --color-warm-cream: #FAFAFC;
+  --color-beige-cream: #F1F5F9;
+  --color-border-ash: #E2E8F0;
   --color-alert-red: #E04646;
   --color-whatsapp-green: #25D366;
 
   /* ── Dark palette ── */
-  --color-dark-bg: #0E0E0E;
-  --color-dark-card: #171717;
-  --color-dark-elevated: #1F1F1F;
-  --color-dark-border: #2A2A2A;
+  --color-dark-bg: #020617;
+  --color-dark-card: #0F172A;
+  --color-dark-elevated: #1E293B;
+  --color-dark-border: #334155;
   --color-dark-text: #FFFFFF;
-  --color-dark-secondary: #D6D0C7;
-  --color-dark-muted: #A39C92;
-  --color-dark-accent: #EFE7DA;
+  --color-dark-secondary: #CBD5E1;
+  --color-dark-muted: #94A3B8;
+  --color-dark-accent: #CBD5E1;
 
   /* ── Legacy aliases (keep Tailwind classes working) ── */
-  --color-dark-grey: #171717;
+  --color-dark-grey: #0F172A;
 
-  --font-display: "Cormorant Garamond", "Playfair Display", serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
@@ -48,7 +47,7 @@
   }
 
   body {
-    background-color: var(--color-warm-cream);
+    background-color: #fafafc;
     color: var(--color-luxury-black);
     font-family: var(--font-sans);
     transition: background-color 0.25s ease, color 0.25s ease;
@@ -69,12 +68,12 @@
   }
 
   ::selection {
-    background: #111111;
+    background: #0f172a;
     color: #ffffff;
   }
   html.dark ::selection {
-    background: #EFE7DA;
-    color: #111111;
+    background: #cbd5e1;
+    color: #0f172a;
   }
 
   /* Inputs global reset */
@@ -84,26 +83,26 @@
 
   select {
     background-color: #FFFFFF !important;
-    color: #111111 !important;
-    border-color: #D9D6D0 !important;
+    color: #0F172A !important;
+    border-color: #E2E8F0 !important;
   }
 
   option {
     background-color: #FFFFFF !important;
-    color: #111111 !important;
+    color: #0F172A !important;
   }
 
   option:checked,
   option:hover,
   option:focus {
-    background-color: #EFE7DA !important;
-    color: #111111 !important;
+    background-color: #E2E8F0 !important;
+    color: #0F172A !important;
   }
 
   html.dark select {
     background-color: #171717 !important;
     color: #FFFFFF !important;
-    border: 1px solid #2A2A2A !important;
+    border: 1px solid #334155 !important;
   }
 
   html.dark option {
@@ -138,7 +137,7 @@
   }
 
   .global-header {
-    background: rgba(246, 241, 232, 0.88);
+    background: rgba(250, 250, 252, 0.9);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
   }
@@ -210,8 +209,8 @@
   100% { background-position: 400px 0; }
 }
 
-.skeleton {
-  background: linear-gradient(90deg, #ebe6de 25%, #f3efe8 37%, #ebe6de 63%);
+ .skeleton {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 37%, #e2e8f0 63%);
   background-size: 400px 100%;
   animation: shimmer 1.4s ease infinite;
 }

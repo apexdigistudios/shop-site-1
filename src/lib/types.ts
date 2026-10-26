@@ -1,4 +1,5 @@
 export type StockStatus = "in_stock" | "out_of_stock" | "preorder";
+export type ArtworkAvailability = "Available" | "Reserved" | "Sold";
 /** Product visibility is a boolean column: true = visible, false = hidden. */
 export type Visibility = boolean;
 export type OrderStatus = "pending" | "pending_payment" | "processing" | "shipped" | "delivered" | "cancelled";
@@ -15,6 +16,11 @@ export interface ProductColor {
 export interface Product {
   id: string;
   name: string;
+  title?: string;
+  artist?: string;
+  medium: string | null;
+  dimensions: string | null;
+  availability_status: ArtworkAvailability;
   slug: string;
   description: string | null;
   long_description: string | null;
@@ -43,6 +49,9 @@ export interface Category {
 export interface OrderItem {
   product_id: string;
   name: string;
+  artist?: string | null;
+  medium?: string | null;
+  dimensions?: string | null;
   price: number;
   quantity: number;
   size?: string | null;

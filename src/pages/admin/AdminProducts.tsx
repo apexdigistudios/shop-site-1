@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase, IMAGES_BUCKET } from "../../lib/supabase";
-import type { Category, Product, ProductColor, StockStatus, Visibility } from "../../lib/types";
+import type { ArtworkAvailability, Category, Product, Visibility } from "../../lib/types";
 import { formatPrice, safeImages, slugify } from "../../lib/helpers";
 import { useToast } from "../../contexts/ToastContext";
 import AdminSectionHeader from "../../components/AdminSectionHeader";
@@ -8,15 +8,16 @@ import AdminSectionHeader from "../../components/AdminSectionHeader";
 interface ProductFormState {
   id: string | null;
   name: string;
+  artist: string;
+  medium: string;
+  dimensions: string;
+  availability_status: ArtworkAvailability;
   slug: string;
   description: string;
   long_description: string;
   price: string;
   compare_price: string;
   images: string[];
-  sizes: string;
-  colors: ProductColor[];
-  stock_status: StockStatus;
   featured: boolean;
   new_arrival: boolean;
   sku: string;
@@ -27,15 +28,16 @@ interface ProductFormState {
 const EMPTY_FORM: ProductFormState = {
   id: null,
   name: "",
+  artist: "Christy Black",
+  medium: "",
+  dimensions: "",
+  availability_status: "Available",
   slug: "",
   description: "",
   long_description: "",
   price: "",
   compare_price: "",
   images: [],
-  sizes: "",
-  colors: [],
-  stock_status: "in_stock",
   featured: false,
   new_arrival: false,
   sku: "",
@@ -52,8 +54,6 @@ export default function AdminProducts() {
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [colorName, setColorName] = useState("");
-  const [colorHex, setColorHex] = useState("#111111");
 
   async function loadAll() {
     setLoading(true);
@@ -79,15 +79,16 @@ export default function AdminProducts() {
     setForm({
       id: product.id,
       name: product.name,
+      artist: product.artist || "Christy Black",
+      medium: product.medium || "",
+      dimensions: product.dimensions || "",
+      availability_status: product.availability_status || "Available",
       slug: product.slug,
       description: product.description || "",
       long_description: product.long_description || "",
       price: String(product.price ?? ""),
       compare_price: product.compare_price ? String(product.compare_price) : "",
       images: safeImages(product.images),
-      sizes: (product.sizes || []).join(", "),
-      colors: product.colors || [],
-      stock_status: product.stock_status,
       featured: product.featured,
       new_arrival: product.new_arrival,
       sku: product.sku || "",
@@ -122,16 +123,6 @@ export default function AdminProducts() {
     setForm((prev) => ({ ...prev, images: prev.images.filter((img) => img !== url) }));
   }
 
-  function addColor() {
-    if (!colorName.trim()) return;
-    setForm((prev) => ({ ...prev, colors: [...prev.colors, { name: colorName.trim(), hex: colorHex }] }));
-    setColorName("");
-  }
-
-  function removeColor(name: string) {
-    setForm((prev) => ({ ...prev, colors: prev.colors.filter((c) => c.name !== name) }));
-  }
-
   async function saveProduct(e: React.FormEvent) {
     e.preventDefault();
     if (!form.name.trim() || !form.price) {
@@ -141,18 +132,18 @@ export default function AdminProducts() {
     setSaving(true);
     const payload = {
       name: form.name.trim(),
+      title: form.name.trim(),
+      artist: form.artist.trim() || "Christy Black",
+      medium: form.medium.trim() || null,
+      dimensions: form.dimensions.trim() || null,
+      availability_status: form.availability_status,
       slug: form.slug.trim() || slugify(form.name),
       description: form.description.trim() || null,
       long_description: form.long_description.trim() || null,
       price: parseFloat(form.price) || 0,
       compare_price: form.compare_price ? parseFloat(form.compare_price) : null,
       images: form.images,
-      sizes: form.sizes
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
-      colors: form.colors,
-      stock_status: form.stock_status,
+      stock_status: form.availability_status === "Available" ? "in_stock" : "out_of_stock",
       featured: form.featured,
       new_arrival: form.new_arrival,
       sku: form.sku.trim() || null,
@@ -169,7 +160,7 @@ export default function AdminProducts() {
       }
       if (data) {
         setProducts((prev) => prev.map((p) => (p.id === form.id ? (data as Product) : p)));
-        showToast("Product updated.", "success");
+        showToast("Artwork updated.", "success");
       }
     } else {
       const { data, error } = await supabase.from("products").insert(payload).select().maybeSingle();
@@ -180,7 +171,7 @@ export default function AdminProducts() {
       }
       if (data) {
         setProducts((prev) => [data as Product, ...prev]);
-        showToast("Product created.", "success");
+        showToast("Artwork created.", "success");
       }
     }
     setShowForm(false);
@@ -188,14 +179,14 @@ export default function AdminProducts() {
   }
 
   async function deleteProduct(id: string) {
-    if (!window.confirm("Delete this product permanently?")) return;
+    if (!window.confirm("Delete this artwork permanently?")) return;
     const { error } = await supabase.from("products").delete().eq("id", id);
     if (error) {
       showToast(error.message, "error");
       return;
     }
     setProducts((prev) => prev.filter((p) => p.id !== id));
-    showToast("Product deleted.", "success");
+    showToast("Artwork deleted.", "success");
   }
 
   const inputClass =
@@ -205,14 +196,14 @@ export default function AdminProducts() {
     <div>
       <AdminSectionHeader
         emoji="📦"
-        title="Products"
-        subtitle={`${products.length} product${products.length !== 1 ? "s" : ""}`}
+        title="Artworks"
+        subtitle={`${products.length} artwork${products.length !== 1 ? "s" : ""}`}
         action={
           <button
             onClick={openNewForm}
             className="flex h-10 items-center rounded-full bg-luxury-black px-5 text-xs uppercase tracking-widest text-pure-white transition-all duration-250 hover:scale-[1.02] dark:bg-dark-accent dark:text-luxury-black"
           >
-            + Add Product
+            + Add Artwork
           </button>
         }
       />
@@ -222,12 +213,12 @@ export default function AdminProducts() {
           onSubmit={saveProduct}
           className="mt-6 space-y-5 rounded-2xl border border-border-ash bg-pure-white p-6 transition-theme dark:border-dark-grey dark:bg-dark-grey"
         >
-          <h2 className="font-display text-xl">{form.id ? "Edit Product" : "New Product"}</h2>
+          <h2 className="font-display text-xl">{form.id ? "Edit Artwork" : "New Artwork"}</h2>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <input
               className={inputClass}
-              placeholder="Product name"
+              placeholder="Artwork title"
               value={form.name}
               onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
             />
@@ -264,7 +255,7 @@ export default function AdminProducts() {
               value={form.category_id}
               onChange={(e) => setForm((p) => ({ ...p, category_id: e.target.value }))}
             >
-              <option value="">No category</option>
+              <option value="">No collection</option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
@@ -273,12 +264,15 @@ export default function AdminProducts() {
             </select>
             <select
               className={inputClass}
-              value={form.stock_status}
-              onChange={(e) => setForm((p) => ({ ...p, stock_status: e.target.value as StockStatus }))}
+              value={form.availability_status}
+              onChange={(e) => setForm((p) => ({
+                ...p,
+                availability_status: e.target.value as ArtworkAvailability,
+              }))}
             >
-              <option value="in_stock">In Stock</option>
-              <option value="out_of_stock">Out of Stock</option>
-              <option value="preorder">Pre-order</option>
+              <option value="Available">Available</option>
+              <option value="Reserved">Reserved</option>
+              <option value="Sold">Sold</option>
             </select>
             <select
               className={inputClass}
@@ -288,6 +282,27 @@ export default function AdminProducts() {
               <option value="true">Visible</option>
               <option value="false">Hidden</option>
             </select>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <input
+              className={inputClass}
+              placeholder="Artist"
+              value={form.artist}
+              onChange={(e) => setForm((p) => ({ ...p, artist: e.target.value }))}
+            />
+            <input
+              className={inputClass}
+              placeholder="Medium (e.g. Oil & Gold Leaf on Linen)"
+              value={form.medium}
+              onChange={(e) => setForm((p) => ({ ...p, medium: e.target.value }))}
+            />
+            <input
+              className={inputClass}
+              placeholder="Dimensions (e.g. 24 × 36 in)"
+              value={form.dimensions}
+              onChange={(e) => setForm((p) => ({ ...p, dimensions: e.target.value }))}
+            />
           </div>
 
           <textarea
@@ -305,54 +320,8 @@ export default function AdminProducts() {
             onChange={(e) => setForm((p) => ({ ...p, long_description: e.target.value }))}
           />
 
-          <input
-            className={inputClass}
-            placeholder="Sizes (comma separated, e.g. S, M, L, XL)"
-            value={form.sizes}
-            onChange={(e) => setForm((p) => ({ ...p, sizes: e.target.value }))}
-          />
-
           <div>
-            <span className="text-xs uppercase tracking-widest text-ash-grey">Colors</span>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              {form.colors.map((c) => (
-                <span
-                  key={c.name}
-                  className="flex items-center gap-2 rounded-full border border-border-ash px-3 py-1 text-xs dark:border-dark-grey"
-                >
-                  <span className="h-3 w-3 rounded-full" style={{ backgroundColor: c.hex }} />
-                  {c.name}
-                  <button type="button" onClick={() => removeColor(c.name)} className="text-alert-red">
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-            <div className="mt-2 flex gap-2">
-              <input
-                className={inputClass}
-                placeholder="Color name (e.g. Ivory)"
-                value={colorName}
-                onChange={(e) => setColorName(e.target.value)}
-              />
-              <input
-                type="color"
-                value={colorHex}
-                onChange={(e) => setColorHex(e.target.value)}
-                className="h-10 w-14 rounded-lg border border-border-ash dark:border-dark-grey"
-              />
-              <button
-                type="button"
-                onClick={addColor}
-                className="rounded-lg border border-luxury-black px-4 text-xs uppercase tracking-widest dark:border-pure-white"
-              >
-                Add
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <span className="text-xs uppercase tracking-widest text-ash-grey">Product Images</span>
+            <span className="text-xs uppercase tracking-widest text-ash-grey">Artwork Images</span>
             <div className="mt-2 flex flex-wrap gap-3">
               {form.images.map((img) => (
                 <div key={img} className="relative h-24 w-20 overflow-hidden rounded-lg border border-border-ash dark:border-dark-grey">
@@ -398,7 +367,7 @@ export default function AdminProducts() {
               disabled={saving}
               className="rounded-full bg-luxury-black px-6 py-2.5 text-xs uppercase tracking-widest text-pure-white disabled:opacity-50 dark:bg-pure-white dark:text-luxury-black"
             >
-              {saving ? "Saving..." : "Save Product"}
+              {saving ? "Saving..." : "Save Artwork"}
             </button>
             <button
               type="button"
@@ -422,16 +391,17 @@ export default function AdminProducts() {
             ))}
           </div>
         ) : products.length === 0 ? (
-          <p className="text-sm text-ash-grey">No products yet. Click &quot;Add Product&quot; to create your first listing.</p>
+          <p className="text-sm text-ash-grey">No artworks yet. Click &quot;Add Artwork&quot; to create your first listing.</p>
         ) : (
           <div className="overflow-x-auto rounded-2xl border border-border-ash dark:border-dark-grey">
             <table className="w-full text-left text-sm">
               <thead className="bg-beige-cream text-xs uppercase tracking-widest text-ash-grey dark:bg-luxury-black">
                 <tr>
                   <th className="px-4 py-3">Image</th>
-                  <th className="px-4 py-3">Name</th>
+                  <th className="px-4 py-3">Artwork</th>
                   <th className="px-4 py-3">Price</th>
-                  <th className="px-4 py-3">Stock</th>
+                  <th className="px-4 py-3">Availability</th>
+                  <th className="px-4 py-3">Medium</th>
                   <th className="px-4 py-3">Visibility</th>
                   <th className="px-4 py-3">Actions</th>
                 </tr>
@@ -446,9 +416,10 @@ export default function AdminProducts() {
                           {image && <img src={image} alt={product.name} className="h-full w-full object-cover" />}
                         </div>
                       </td>
-                      <td className="px-4 py-3">{product.name}</td>
+                      <td className="px-4 py-3">{product.title || product.name}</td>
                       <td className="px-4 py-3">{formatPrice(product.price)}</td>
-                      <td className="px-4 py-3 capitalize">{product.stock_status.replace("_", " ")}</td>
+                      <td className="px-4 py-3">{product.availability_status}</td>
+                      <td className="px-4 py-3">{product.medium || "—"}</td>
                       <td className="px-4 py-3">{product.visibility ? "Visible" : "Hidden"}</td>
                       <td className="px-4 py-3">
                         <div className="flex gap-3">

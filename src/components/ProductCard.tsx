@@ -8,7 +8,7 @@ export default function ProductCard({ product }: { product: Product }) {
   const images = safeImages(product.images);
   const primary = images[0] ?? null;
   const secondary = images[1] ?? null;
-  const soldOut = product.stock_status === "out_of_stock";
+  const soldOut = product.availability_status !== "Available" || product.stock_status === "out_of_stock";
 
   return (
     <Link
@@ -17,9 +17,9 @@ export default function ProductCard({ product }: { product: Product }) {
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
     >
-      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl border border-[#D9D6D0] bg-pure-white shadow-[0_6px_18px_rgba(17,17,17,0.04)] transition-all duration-250 ease-out group-hover:border-[#B8B3AA] group-hover:shadow-[0_10px_26px_rgba(17,17,17,0.08)] dark:border-[#2A2A2A] dark:bg-dark-card dark:shadow-[0_8px_22px_rgba(255,255,255,0.03)] dark:group-hover:border-[#EFE7DA55] dark:group-hover:shadow-[0_10px_28px_rgba(255,255,255,0.05)]">
+      <div className="relative aspect-3/4 w-full overflow-hidden rounded-2xl border border-slate-200 bg-pure-white shadow-[0_6px_18px_rgba(15,23,42,0.04)] transition-all duration-250 ease-out group-hover:border-slate-300 group-hover:shadow-[0_10px_26px_rgba(15,23,42,0.08)] dark:border-slate-700 dark:bg-dark-card dark:shadow-[0_8px_22px_rgba(255,255,255,0.03)] dark:group-hover:border-slate-500 dark:group-hover:shadow-[0_10px_28px_rgba(255,255,255,0.05)]">
         <img
-          src={(hovering && secondary ? secondary : primary) || "/placeholder.jpg"}
+          src={(hovering && secondary ? secondary : primary) || "/artwork-placeholder.svg"}
           alt={product.name}
           className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
           loading="lazy"
@@ -41,7 +41,7 @@ export default function ProductCard({ product }: { product: Product }) {
         {soldOut && (
           <div className="absolute inset-0 flex items-center justify-center bg-deep-black/40">
             <span className="rounded-full bg-pure-white px-4 py-1.5 text-xs uppercase tracking-widest text-luxury-black">
-              Sold Out
+              {product.availability_status}
             </span>
           </div>
         )}
@@ -49,7 +49,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
       <div className="mt-3.5 space-y-0.5">
         <h3 className="font-display text-lg leading-snug tracking-wide text-luxury-black transition-colors duration-250 group-hover:text-ash-grey dark:text-dark-text dark:group-hover:text-dark-secondary">
-          {product.name}
+          {product.title || product.name}
         </h3>
         <div className="flex items-center gap-2">
           <span className="text-sm text-luxury-black dark:text-dark-text">{formatPrice(product.price)}</span>

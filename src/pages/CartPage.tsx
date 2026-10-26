@@ -12,7 +12,7 @@ export default function CartPage() {
   async function handleRemove(id: string) {
     try {
       await removeFromCart(id);
-      showToast("Removed from bag.", "info");
+      showToast("Artwork removed from your acquisition bag.", "info");
     } catch (e: any) {
       showToast(e.message, "error");
     }
@@ -20,7 +20,7 @@ export default function CartPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
-      <h1 className="mb-10 font-display text-4xl tracking-wide text-luxury-black dark:text-dark-text">Your Bag</h1>
+      <h1 className="mb-10 font-display text-4xl tracking-wide text-luxury-black dark:text-dark-text">Your Acquisition Bag</h1>
 
       {loading ? (
         <div className="space-y-4">
@@ -30,11 +30,11 @@ export default function CartPage() {
         </div>
       ) : items.length === 0 ? (
         <EmptyState
-          title="Your bag is empty"
-          message="Discover pieces from our latest collection."
+          title="Your acquisition bag is empty"
+          message="Discover paintings and masterworks from the collection."
           action={
             <Link to="/shop" className="mt-2 rounded-full bg-luxury-black px-6 py-2.5 text-xs uppercase tracking-widest text-pure-white transition-all duration-250 hover:scale-[1.02] dark:bg-dark-accent dark:text-luxury-black">
-              Shop Now
+              Browse Artworks
             </Link>
           }
         />
@@ -50,7 +50,7 @@ export default function CartPage() {
                 >
                   <div className="h-28 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-beige-cream dark:bg-dark-elevated">
                     <img
-                      src={image || "/placeholder.jpg"}
+                      src={image || "/artwork-placeholder.svg"}
                       alt={item.product?.name || "Product"}
                       className="h-full w-full object-cover"
                       loading="lazy"
@@ -63,10 +63,11 @@ export default function CartPage() {
                           to={item.product ? `/product/${item.product.slug}` : "#"}
                           className="font-display text-lg text-luxury-black transition-colors duration-200 hover:text-ash-grey dark:text-dark-text dark:hover:text-dark-secondary"
                         >
-                          {item.product?.name || "Product"}
+                          {item.product?.title || item.product?.name || "Artwork"}
                         </Link>
                         <p className="mt-1 text-xs text-muted-grey dark:text-dark-muted">
-                          {item.size ? `Size: ${item.size}` : ""} {item.color ? `• Color: ${item.color}` : ""}
+                          {item.product?.medium || "Original artwork"}
+                          {item.product?.dimensions ? ` • ${item.product.dimensions}` : ""}
                         </p>
                       </div>
                       <button onClick={() => handleRemove(item.id)} className="text-xs uppercase tracking-widest text-alert-red transition-colors duration-200 hover:text-alert-red/70">
@@ -108,8 +109,8 @@ export default function CartPage() {
               <span>{formatPrice(subtotal)}</span>
             </div>
             <div className="mt-1 flex justify-between text-sm text-muted-grey dark:text-dark-muted">
-              <span>Shipping</span>
-              <span>Calculated at checkout</span>
+              <span>Delivery</span>
+              <span>Arranged after acquisition</span>
             </div>
             <div className="mt-4 flex justify-between border-t border-soft-grey/40 pt-4 text-base text-luxury-black transition-theme dark:border-dark-border dark:text-dark-text">
               <span>Total</span>
@@ -119,7 +120,7 @@ export default function CartPage() {
               onClick={() => navigate("/checkout")}
               className="mt-6 w-full rounded-full bg-luxury-black px-6 py-3.5 text-xs uppercase tracking-[0.2em] text-pure-white transition-all duration-250 hover:scale-[1.02] dark:bg-dark-accent dark:text-luxury-black"
             >
-              Proceed to Checkout
+              Continue to Acquisition
             </button>
           </div>
         </div>

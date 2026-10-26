@@ -8,7 +8,7 @@ export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 if (!isSupabaseConfigured) {
   // eslint-disable-next-line no-console
   console.warn(
-    "[ADOB'S IMPORTS HUB] Supabase env vars are missing. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env file."
+    "[The Christy Black Art Gallery] Supabase env vars are missing. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env file."
   );
 }
 

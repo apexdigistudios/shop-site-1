@@ -9,16 +9,16 @@ import { useBranding } from "../contexts/BrandingContext";
 const STORE_LINKS = [
   { to: "/", label: "Home", end: true },
   { to: "/shop", label: "Shop" },
-  { to: "/categories", label: "Categories" },
+  { to: "/categories", label: "Collections" },
   { to: "/wishlist", label: "Wishlist" },
 ];
 
 const ADMIN_PRIMARY_LINKS = [
   { to: "/admin", label: "Overview", end: true },
-  { to: "/admin/products", label: "Products" },
+  { to: "/admin/products", label: "Artworks" },
   { to: "/admin/orders", label: "Orders" },
   { to: "/admin/users", label: "Users" },
-  { to: "/admin/categories", label: "Categories" },
+  { to: "/admin/categories", label: "Collections" },
 ];
 
 const ADMIN_SECONDARY_LINKS = [
@@ -74,15 +74,15 @@ export default function Header() {
             />
           ) : (
             <>
-              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-luxury-black/15 bg-luxury-black text-pure-white transition-all duration-250 group-hover:scale-105 dark:border-pure-white/15 dark:bg-pure-white dark:text-luxury-black">
-                <span className="font-display text-base font-semibold tracking-tighter">A|H</span>
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-luxury-black/15 bg-luxury-black text-pure-white transition-all duration-250 group-hover:scale-105 dark:border-pure-white/15 dark:bg-pure-white dark:text-luxury-black">
+                <span className="font-display text-base font-semibold tracking-tighter">CB</span>
               </div>
               <div className="flex flex-col">
                 <span className="font-display text-lg font-medium leading-none tracking-[0.18em] text-luxury-black dark:text-dark-text">
-                  ADOB&apos;S
+                  CHRISTY BLACK
                 </span>
                 <span className="text-[9px] font-medium uppercase leading-tight tracking-[0.3em] text-muted-grey dark:text-dark-muted">
-                  IMPORTS HUB
+                  ART GALLERY
                 </span>
               </div>
             </>
@@ -157,7 +157,7 @@ export default function Header() {
                 )}
               </div>
 
-              <span className="h-4 w-[1px] bg-soft-grey/40 dark:bg-dark-border" />
+              <span className="h-4 w-px bg-soft-grey/40 dark:bg-dark-border" />
 
               <Link
                 to="/"
@@ -220,7 +220,7 @@ export default function Header() {
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search for luxury imports, apparel, accessories..."
+              placeholder="Search artworks, paintings, and masterworks..."
               className="w-full border-b border-soft-grey/60 bg-transparent py-2 text-sm text-luxury-black outline-none placeholder:text-muted-grey dark:border-dark-border dark:text-dark-text"
             />
             <button type="submit" className="text-xs font-medium uppercase tracking-widest text-luxury-black dark:text-dark-text">

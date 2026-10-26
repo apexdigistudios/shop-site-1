@@ -93,13 +93,13 @@ export default function WishlistPage() {
                 <Link to={item.product ? `/product/${item.product.slug}` : "#"} className="block">
                   <div className="aspect-[3/4] w-full overflow-hidden rounded-2xl border border-soft-grey/40 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-all duration-250 group-hover:-translate-y-[3px] group-hover:shadow-[0_6px_20px_rgba(0,0,0,0.08)] dark:border-dark-border dark:bg-dark-card dark:shadow-[0_1px_3px_rgba(0,0,0,0.2)] dark:group-hover:shadow-[0_6px_20px_rgba(0,0,0,0.35)]">
                     <img
-                      src={image || "/placeholder.jpg"}
+                      src={image || "/artwork-placeholder.svg"}
                       alt={item.product?.name || "Product"}
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                       loading="lazy"
                     />
                   </div>
-                  <h3 className="mt-3 font-display text-lg text-luxury-black dark:text-dark-text">{item.product?.name}</h3>
+                  <h3 className="mt-3 font-display text-lg text-luxury-black dark:text-dark-text">{item.product?.title || item.product?.name}</h3>
                   <p className="text-sm text-muted-grey dark:text-dark-muted">{formatPrice(item.product?.price)}</p>
                 </Link>
                 <div className="mt-3 flex gap-2">
