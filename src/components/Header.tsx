@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "../contexts/AuthContext";
 import { useCart } from "../contexts/CartContext";
 import { SearchIcon, UserIcon, CartIcon, MenuIcon, CloseIcon, ChevronDownIcon } from "./icons";
@@ -36,12 +35,28 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [adminDropdownOpen, setAdminDropdownOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [query, setQuery] = useState("");
   const { user, appUser, signOut } = useAuth();
   const { count } = useCart();
   const { logoUrl } = useBranding();
 
   const isAdminRoute = location.pathname.startsWith("/admin");
+  const isHome = location.pathname === "/";
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -58,10 +73,16 @@ export default function Header() {
   }
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 h-[76px] border-b border-black/10 bg-white/80 text-slate-900 backdrop-blur-md transition-all duration-250 ease-out">
+    <header
+      className={`fixed inset-x-0 top-0 z-50 h-[76px] transition-all duration-300 ease-out ${
+        isScrolled
+          ? "border-b border-black/10 bg-white/85 text-slate-900 backdrop-blur-md shadow-sm"
+          : "border-b border-transparent bg-transparent text-slate-900"
+      }`}
+    >
       <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-5 sm:px-8">
         {/* BRAND LOGO AREA */}
-        <Link to="gallery-ruby-nine.vercel.app" className="group flex items-center gap-3 transition-opacity duration-200 hover:opacity-80" aria-label="Home">
+        <Link to="/" className="group flex items-center gap-3 transition-opacity duration-200 hover:opacity-80" aria-label="Home">
           {logoUrl ? (
             <img
               src={logoUrl}
@@ -74,14 +95,14 @@ export default function Header() {
             />
           ) : (
             <>
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-black/10 bg-white text-slate-900 transition-all duration-250 group-hover:scale-105">
+              <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-all duration-250 group-hover:scale-105 ${isHome && !isScrolled ? "border-white/20 bg-white/10 text-white backdrop-blur-sm" : "border-black/10 bg-white text-slate-900"}`}>
                 <span className="font-display text-base font-semibold tracking-tighter">CB</span>
               </div>
               <div className="flex flex-col">
-                <span className="font-display text-lg font-medium leading-none tracking-[0.18em] text-slate-900">
+                <span className={`font-display text-lg font-medium leading-none tracking-[0.18em] ${isHome && !isScrolled ? "text-white drop-shadow" : "text-slate-900"}`}>
                   CHRISTY BLACK
                 </span>
-                <span className="text-[9px] font-medium uppercase leading-tight tracking-[0.3em] text-slate-600">
+                <span className={`text-[9px] font-medium uppercase leading-tight tracking-[0.3em] ${isHome && !isScrolled ? "text-slate-200 drop-shadow" : "text-slate-600"}`}>
                   ART GALLERY
                 </span>
               </div>
@@ -99,8 +120,14 @@ export default function Header() {
                   to={link.to}
                   end={link.end}
                   className={({ isActive }) =>
-                    `text-xs uppercase tracking-[0.2em] transition-all duration-200 hover:text-slate-900 ${
-                      isActive ? "font-medium text-slate-900" : "text-slate-600"
+                    `text-xs uppercase tracking-[0.2em] transition-all duration-200 ${
+                      isActive
+                        ? isHome && !isScrolled
+                          ? "font-medium text-white drop-shadow"
+                          : "font-medium text-slate-900"
+                        : isHome && !isScrolled
+                          ? "text-slate-200 hover:text-white drop-shadow"
+                          : "text-slate-600 hover:text-slate-900"
                     }`
                   }
                 >
@@ -157,7 +184,7 @@ export default function Header() {
                 )}
               </div>
 
-              <span className="h-4 w-p-px bg-black/10" />
+              <span className="h-4 w-px bg-black/10" />
 
               <Link
                 to="/"
@@ -175,26 +202,34 @@ export default function Header() {
             type="button"
             onClick={() => setSearchOpen((v) => !v)}
             aria-label="Search"
-            className="flex h-10 w-10 items-center justify-center text-slate-600 transition-all duration-200 hover:text-slate-900"
+            className={`flex h-10 w-10 items-center justify-center transition-all duration-200 ${
+              isHome && !isScrolled ? "text-white hover:opacity-80 drop-shadow" : "text-slate-600 hover:text-slate-900"
+            }`}
           >
             <SearchIcon />
           </button>
 
-          <ThemeToggle className="hidden sm:flex" />
-
           <Link
             to="/account"
             aria-label="Account"
-            className="hidden h-10 w-10 items-center justify-center text-slate-600 transition-all duration-200 hover:text-slate-900 sm:flex"
+            className={`hidden h-10 w-10 items-center justify-center transition-all duration-200 sm:flex ${
+              isHome && !isScrolled ? "text-white hover:opacity-80 drop-shadow" : "text-slate-600 hover:text-slate-900"
+            }`}
           >
             <UserIcon />
           </Link>
 
           {!isAdminRoute && (
-            <Link to="/cart" aria-label="Cart" className="relative flex h-10 w-10 items-center justify-center text-slate-600 transition-all duration-200 hover:text-slate-900">
+            <Link
+              to="/cart"
+              aria-label="Cart"
+              className={`relative flex h-10 w-10 items-center justify-center transition-all duration-200 ${
+                isHome && !isScrolled ? "text-white hover:opacity-80 drop-shadow" : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
               <CartIcon />
               {count > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-slate-200 text-[9px] font-medium text-slate-900">
+                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-slate-900 text-[9px] font-medium text-white shadow">
                   {count}
                 </span>
               )}
@@ -205,7 +240,9 @@ export default function Header() {
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
-            className="flex h-10 w-10 items-center justify-center text-slate-600 transition-all duration-200 hover:text-slate-900 lg:hidden"
+            className={`flex h-10 w-10 items-center justify-center transition-all duration-200 lg:hidden ${
+              isHome && !isScrolled ? "text-white hover:opacity-80 drop-shadow" : "text-slate-600 hover:text-slate-900"
+            }`}
           >
             {menuOpen ? <CloseIcon /> : <MenuIcon />}
           </button>
@@ -214,7 +251,7 @@ export default function Header() {
 
       {/* SEARCH PANEL */}
       {searchOpen && (
-        <div className="border-b border-black/10 bg-white/80 px-5 py-3.5 shadow-sm backdrop-blur-md sm:px-8">
+        <div className="border-b border-black/10 bg-white/95 px-5 py-3.5 shadow-md backdrop-blur-md sm:px-8">
           <form onSubmit={handleSearchSubmit} className="mx-auto flex max-w-7xl items-center gap-3">
             <input
               autoFocus
@@ -232,7 +269,7 @@ export default function Header() {
 
       {/* MOBILE MENU DROPDOWN */}
       {menuOpen && (
-        <div className="max-h-[80vh] overflow-y-auto border-b border-black/10 bg-white/90 px-5 py-6 text-slate-900 shadow-xl backdrop-blur-md lg:hidden">
+        <div className="max-h-[80vh] overflow-y-auto border-b border-black/10 bg-white/95 px-5 py-6 text-slate-900 shadow-xl backdrop-blur-md lg:hidden">
           <div className="flex flex-col gap-4">
             {!isAdminRoute ? (
               <>
@@ -311,15 +348,11 @@ export default function Header() {
                     signOut();
                     setMenuOpen(false);
                   }}
-                  className="text-left text-xs uppercase tracking-[0.2em] text-alert-red"
+                  className="text-left text-xs uppercase tracking-[0.2em] text-red-600"
                 >
                   Sign Out
                 </button>
               )}
-              <div className="flex items-center justify-between pt-2">
-                <span className="text-xs uppercase tracking-widest text-slate-600">Theme</span>
-                <ThemeToggle />
-              </div>
             </div>
           </div>
         </div>
