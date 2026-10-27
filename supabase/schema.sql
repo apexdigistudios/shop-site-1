@@ -443,38 +443,15 @@ SELECT
 WHERE NOT EXISTS (SELECT 1 FROM public.home_text);
 
 -- ---------------------------------------------------------------------
--- Supabase Storage: public image delivery, admin-only writes
+-- Supabase Storage setup (run through the Supabase Dashboard)
 -- ---------------------------------------------------------------------
-
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('images', 'images', true)
-ON CONFLICT (id) DO UPDATE SET public = true;
-
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Public can view gallery images" ON storage.objects;
-DROP POLICY IF EXISTS "Admins can upload gallery images" ON storage.objects;
-DROP POLICY IF EXISTS "Admins can update gallery images" ON storage.objects;
-DROP POLICY IF EXISTS "Admins can delete gallery images" ON storage.objects;
-
-CREATE POLICY "Public can view gallery images"
-  ON storage.objects FOR SELECT TO anon, authenticated
-  USING (bucket_id = 'images');
-
-CREATE POLICY "Admins can upload gallery images"
-  ON storage.objects FOR INSERT TO authenticated
-  WITH CHECK (bucket_id = 'images' AND public.is_admin());
-
-CREATE POLICY "Admins can update gallery images"
-  ON storage.objects FOR UPDATE TO authenticated
-  USING (bucket_id = 'images' AND public.is_admin())
-  WITH CHECK (bucket_id = 'images' AND public.is_admin());
-
-CREATE POLICY "Admins can delete gallery images"
-  ON storage.objects FOR DELETE TO authenticated
-  USING (bucket_id = 'images' AND public.is_admin());
-
-GRANT SELECT ON storage.objects TO anon, authenticated;
-GRANT INSERT, UPDATE, DELETE ON storage.objects TO authenticated;
+-- The storage schema is managed by Supabase and may not be owned by the
+-- SQL Editor role. Create a public bucket named "images" in Storage.
+-- In Storage > Policies, add policies for storage.objects:
+--   SELECT: bucket_id = 'images' (or rely on public-bucket delivery)
+--   INSERT: bucket_id = 'images' AND public.is_admin()
+--   UPDATE: bucket_id = 'images' AND public.is_admin()
+--   DELETE: bucket_id = 'images' AND public.is_admin()
+-- Do not run ALTER TABLE against storage.objects from this script.
 
 COMMIT;
