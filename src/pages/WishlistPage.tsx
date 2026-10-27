@@ -6,7 +6,21 @@ import { useCart } from "../contexts/CartContext";
 import { useToast } from "../contexts/ToastContext";
 import type { WishlistItem } from "../lib/types";
 import EmptyState from "../components/EmptyState";
-import { formatPrice, safeImages } from "../lib/helpers";
+import { safeImages } from "../lib/helpers";
+
+function formatCompactAmount(value: number | null | undefined): string {
+  const n = typeof value === "number" && !Number.isNaN(value) ? value : 0;
+  if (n >= 1_000_000_000) {
+    return "GH₵" + (n / 1_000_000_000).toFixed(1).replace(/\.0$/, "") + "B";
+  }
+  if (n >= 1_000_000) {
+    return "GH₵" + (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+  }
+  if (n >= 1_000) {
+    return "GH₵" + (n / 1_000).toFixed(1).replace(/\.0$/, "") + "k";
+  }
+  return "GH₵" + n.toLocaleString();
+}
 
 export default function WishlistPage() {
   const { user } = useAuth();
@@ -50,12 +64,15 @@ export default function WishlistPage() {
 
   if (!user) {
     return (
-      <div className="mx-auto max-w-3xl px-5 py-24">
+      <div className="mx-auto max-w-3xl px-4 py-20">
         <EmptyState
           title="Sign in to view your wishlist"
           message="Save your favorite pieces to revisit them anytime."
           action={
-            <Link to="/account" className="mt-2 rounded-full bg-luxury-black px-6 py-2.5 text-xs uppercase tracking-widest text-pure-white dark:bg-pure-white dark:text-luxury-black">
+            <Link
+              to="/account"
+              className="mt-2 rounded-2xl bg-slate-900 px-6 py-3 text-xs font-semibold uppercase tracking-wider text-white shadow transition-all hover:bg-slate-800"
+            >
               Login / Signup
             </Link>
           }
@@ -65,13 +82,21 @@ export default function WishlistPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
-      <h1 className="mb-10 font-display text-4xl tracking-wide text-luxury-black dark:text-pure-white">Wishlist</h1>
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-8 pb-24 space-y-8">
+      {/* Page Header */}
+      <div className="text-center space-y-2">
+        <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-wide text-slate-900">
+          Saved Artworks
+        </h1>
+        <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto">
+          Your personal collection of saved masterworks and pieces.
+        </p>
+      </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-6 sm:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="aspect-[3/4] w-full animate-pulse rounded-2xl bg-beige-cream dark:bg-dark-grey" />
+            <div key={i} className="aspect-4/5 w-full animate-pulse rounded-3xl bg-slate-100" />
           ))}
         </div>
       ) : items.length === 0 ? (
@@ -79,39 +104,63 @@ export default function WishlistPage() {
           title="Your wishlist is empty"
           message="Tap the heart icon on any product to save it here."
           action={
-            <Link to="/shop" className="mt-2 rounded-full bg-luxury-black px-6 py-2.5 text-xs uppercase tracking-widest text-pure-white dark:bg-pure-white dark:text-luxury-black">
+            <Link
+              to="/shop"
+              className="mt-2 rounded-2xl bg-slate-900 px-6 py-3 text-xs font-semibold uppercase tracking-wider text-white shadow transition-all hover:bg-slate-800"
+            >
               Shop Now
             </Link>
           }
         />
       ) : (
-        <div className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-6">
+        <div className="grid grid-cols-2 gap-3 sm:gap-6 sm:grid-cols-3 lg:grid-cols-4">
           {items.map((item) => {
             const image = safeImages(item.product?.images)[0];
+            const productKey = item.product?.slug || item.product?.id;
             return (
-              <div key={item.id} className="group">
-                <Link to={item.product ? `/product/${item.product.slug}` : "#"} className="block">
-                  <div className="aspect-[3/4] w-full overflow-hidden rounded-2xl border border-soft-grey/40 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-all duration-250 group-hover:-translate-y-[3px] group-hover:shadow-[0_6px_20px_rgba(0,0,0,0.08)] dark:border-dark-border dark:bg-dark-card dark:shadow-[0_1px_3px_rgba(0,0,0,0.2)] dark:group-hover:shadow-[0_6px_20px_rgba(0,0,0,0.35)]">
+              <div key={item.id} className="flex flex-col space-y-2">
+                <Link
+                  to={productKey ? `/product/${productKey}` : "#"}
+                  className="group relative block aspect-4/5 w-full overflow-hidden rounded-3xl bg-slate-100 shadow-xs transition-all hover:shadow-md"
+                >
+                  {image ? (
                     <img
-                      src={image || "/artwork-placeholder.svg"}
+                      src={image}
                       alt={item.product?.name || "Product"}
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                       loading="lazy"
                     />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-xs text-slate-400">
+                      No Image
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 z-10 p-3.5 sm:p-5 space-y-0.5 sm:space-y-1">
+                    <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-amber-400 block truncate">
+                      {item.product?.medium || "Original Art"}
+                    </span>
+                    <h3 className="font-display text-xs sm:text-base font-bold text-white truncate">
+                      {item.product?.title || item.product?.name || "Artwork"}
+                    </h3>
+                    <p className="font-display text-xs sm:text-sm font-semibold text-slate-200">
+                      {formatCompactAmount(item.product?.price)}
+                    </p>
                   </div>
-                  <h3 className="mt-3 font-display text-lg text-luxury-black dark:text-dark-text">{item.product?.title || item.product?.name}</h3>
-                  <p className="text-sm text-muted-grey dark:text-dark-muted">{formatPrice(item.product?.price)}</p>
                 </Link>
-                <div className="mt-3 flex gap-2">
+
+                <div className="flex items-center gap-2 pt-1">
                   <button
+                    type="button"
                     onClick={() => handleMoveToCart(item)}
-                    className="flex-1 rounded-full bg-luxury-black px-3 py-2 text-[10px] uppercase tracking-widest text-pure-white dark:bg-pure-white dark:text-luxury-black"
+                    className="flex-1 rounded-2xl bg-slate-900 px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-xs transition-colors hover:bg-slate-800"
                   >
                     Add to Bag
                   </button>
                   <button
+                    type="button"
                     onClick={() => handleRemove(item.id)}
-                    className="rounded-full border border-border-ash px-3 py-2 text-[10px] uppercase tracking-widest text-alert-red dark:border-dark-grey"
+                    className="rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider text-red-600 transition-colors hover:bg-red-50 hover:border-red-200 shadow-xs"
                   >
                     Remove
                   </button>

@@ -2,8 +2,22 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import type { Category, Product } from "../lib/types";
-import ProductCard from "../components/ProductCard";
+import { safeImages } from "../lib/helpers";
 import EmptyState from "../components/EmptyState";
+
+function formatCompactAmount(value: number | null | undefined): string {
+  const n = typeof value === "number" && !Number.isNaN(value) ? value : 0;
+  if (n >= 1_000_000_000) {
+    return "GH₵" + (n / 1_000_000_000).toFixed(1).replace(/\.0$/, "") + "B";
+  }
+  if (n >= 1_000_000) {
+    return "GH₵" + (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+  }
+  if (n >= 1_000) {
+    return "GH₵" + (n / 1_000).toFixed(1).replace(/\.0$/, "") + "k";
+  }
+  return "GH₵" + n.toLocaleString();
+}
 
 export default function CategoryPage() {
   const { id } = useParams();
@@ -33,12 +47,12 @@ export default function CategoryPage() {
 
   if (!loading && !category) {
     return (
-      <div className="mx-auto max-w-3xl px-5 py-24">
+      <div className="mx-auto max-w-3xl px-4 py-20">
         <EmptyState
           title="Collection not found"
           message="This collection may have been removed."
           action={
-            <Link to="/categories" className="mt-2 text-xs uppercase tracking-widest text-luxury-black underline dark:text-pure-white">
+            <Link to="/categories" className="mt-2 text-xs font-semibold uppercase tracking-wider text-slate-900 underline">
               Back to Collections
             </Link>
           }
@@ -48,32 +62,81 @@ export default function CategoryPage() {
   }
 
   return (
-    <div>
-      <div className="relative flex h-64 items-end overflow-hidden bg-luxury-black sm:h-80">
+    <div className="space-y-8 pb-24">
+      {/* Category Banner (Reverted to object-cover) */}
+      <div className="relative flex h-56 sm:h-72 items-end overflow-hidden bg-slate-900">
         {category?.image && (
-          <img src={category.image} alt={category.name} className="absolute inset-0 h-full w-full object-cover opacity-60" />
+          <img
+            src={category.image}
+            alt={category.name}
+            className="absolute inset-0 h-full w-full object-cover opacity-60"
+          />
         )}
-        <div className="absolute inset-0 bg-linear-to-t from-deep-black/90 via-deep-black/30 to-transparent" />
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-8 sm:px-8">
-          <h1 className="font-display text-4xl tracking-wide text-pure-white">{category?.name || "Collection"}</h1>
-          {category?.description && <p className="mt-2 max-w-xl text-sm text-soft-grey">{category.description}</p>}
+        <div className="absolute inset-0 bg-linear-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-8 pb-8 space-y-1">
+          <h1 className="font-display text-2xl sm:text-4xl font-bold tracking-wide text-white">
+            {category?.name || "Collection"}
+          </h1>
+          {category?.description && (
+            <p className="max-w-xl text-xs sm:text-sm text-slate-300 leading-relaxed">
+              {category.description}
+            </p>
+          )}
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8">
+      {/* Products Grid */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-8">
         {loading ? (
-          <div className="grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-6 sm:grid-cols-3 lg:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="aspect-3/4 w-full animate-pulse rounded-2xl bg-beige-cream dark:bg-dark-grey" />
+              <div key={i} className="aspect-4/5 w-full animate-pulse rounded-3xl bg-slate-100" />
             ))}
           </div>
         ) : products.length === 0 ? (
           <EmptyState title="No artworks yet" message="Artworks in this collection will appear here soon." />
         ) : (
-          <div className="grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+          <div className="grid grid-cols-2 gap-3 sm:gap-6 sm:grid-cols-3 lg:grid-cols-4">
+            {products.map((product) => {
+              const image = safeImages(product.images)[0];
+              const productKey = product.slug || product.id;
+              return (
+                <Link
+                  key={product.id}
+                  to={`/product/${productKey}`}
+                  className="group relative block aspect-4/5 w-full overflow-hidden rounded-3xl bg-slate-100 shadow-sm transition-all hover:shadow-md"
+                >
+                  {image ? (
+                    <img
+                      src={image}
+                      alt={product.name}
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-xs text-slate-400">No Image</div>
+                  )}
+                  <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute left-2.5 top-2.5 z-10 flex flex-col gap-1">
+                    {product.new_arrival && (
+                      <span className="rounded-full bg-white/90 backdrop-blur-xs px-2 py-0.5 text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-slate-900 shadow-xs">
+                        New
+                      </span>
+                    )}
+                  </div>
+                  <div className="absolute inset-x-0 bottom-0 z-10 p-3.5 sm:p-5 space-y-0.5 sm:space-y-1">
+                    <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-amber-400 block truncate">
+                      {product.medium || "Original Art"}
+                    </span>
+                    <h3 className="font-display text-xs sm:text-base font-bold text-white truncate">
+                      {product.title || product.name}
+                    </h3>
+                    <p className="font-display text-xs sm:text-sm font-semibold text-slate-200">
+                      {formatCompactAmount(product.price)}
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>

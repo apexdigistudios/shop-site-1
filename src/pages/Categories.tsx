@@ -25,44 +25,60 @@ export default function Categories() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8">
-      <div className="mb-12 text-center">
-        <h1 className="font-display text-4xl tracking-wide text-luxury-black dark:text-pure-white">Collections</h1>
-        <p className="mt-3 text-sm text-ash-grey">Explore collections of paintings and masterworks.</p>
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-8 pb-24 space-y-8">
+      {/* Page Header */}
+      <div className="text-center space-y-2">
+        <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-wide text-slate-900">
+          Collections
+        </h1>
+        <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto">
+          Explore curated collections of paintings, prints, and masterworks.
+        </p>
       </div>
 
+      {/* Grid Display: 2 items per row on mobile, 3 on tablet, 4 on desktop */}
       {loading ? (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4 lg:gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="mx-auto aspect-[1/1.1] w-full max-w-[270px] animate-pulse rounded-2xl bg-soft-grey/30 dark:bg-dark-card" />
+        <div className="grid grid-cols-2 gap-3 sm:gap-6 sm:grid-cols-3 lg:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="aspect-4/5 w-full animate-pulse rounded-3xl bg-slate-100" />
           ))}
         </div>
       ) : categories.length === 0 ? (
         <EmptyState title="No categories yet" message="Categories added by the admin will appear here." />
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4 lg:gap-6">
+        <div className="grid grid-cols-2 gap-3 sm:gap-6 sm:grid-cols-3 lg:grid-cols-4">
           {categories.map((cat) => (
             <Link
               key={cat.id}
               to={`/categories/${cat.id}`}
-              className="group relative mx-auto block aspect-[1/1.1] w-full max-w-[270px] overflow-hidden rounded-2xl border border-soft-grey/40 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-all duration-250 hover:-translate-y-[3px] hover:shadow-[0_6px_20px_rgba(0,0,0,0.08)] dark:border-dark-border dark:bg-dark-card dark:shadow-[0_1px_3px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_6px_20px_rgba(0,0,0,0.35)]"
+              className="group relative block aspect-4/5 w-full overflow-hidden rounded-3xl bg-slate-100 shadow-xs transition-all hover:shadow-md"
             >
               {cat.image ? (
                 <img
                   src={cat.image}
                   alt={cat.name}
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-108"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-muted-grey dark:text-dark-muted">
-                  <span className="font-display text-base">{cat.name}</span>
+                <div className="flex h-full w-full items-center justify-center p-4 text-slate-400">
+                  <span className="font-display text-sm font-bold text-center">{cat.name}</span>
                 </div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-deep-black/75 via-deep-black/20 to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4">
-                <span className="font-display text-xl tracking-wide text-pure-white">{cat.name}</span>
+              {/* Gradient Overlay */}
+              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
+              
+              {/* Content Box */}
+              <div className="absolute inset-x-0 bottom-0 z-10 p-3.5 sm:p-5 space-y-0.5 sm:space-y-1">
+                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-amber-400 block truncate">
+                  Collection
+                </span>
+                <h3 className="font-display text-xs sm:text-base font-bold text-white truncate">
+                  {cat.name}
+                </h3>
                 {cat.description && (
-                  <p className="mt-0.5 line-clamp-2 text-[11px] text-soft-grey/90">{cat.description}</p>
+                  <p className="line-clamp-2 text-[10px] sm:text-xs text-slate-200 leading-relaxed opacity-90">
+                    {cat.description}
+                  </p>
                 )}
               </div>
             </Link>

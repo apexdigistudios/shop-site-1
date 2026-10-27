@@ -23,10 +23,11 @@ export default function AccountPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
 
-  const tab = searchParams.get("tab") || "profile";
+  // If user is admin, force tab to be profile (ignore orders tab)
+  const tab = isAdmin ? "profile" : (searchParams.get("tab") || "profile");
 
   useEffect(() => {
-    if (!user || tab !== "orders") return;
+    if (!user || tab !== "orders" || isAdmin) return;
     setOrdersLoading(true);
     supabase
       .from("orders")
@@ -37,7 +38,7 @@ export default function AccountPage() {
         setOrders((data as Order[]) || []);
         setOrdersLoading(false);
       });
-  }, [user, tab]);
+  }, [user, tab, isAdmin]);
 
   async function handleAuthSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -73,7 +74,7 @@ export default function AccountPage() {
   if (loading) {
     return (
       <div className="mx-auto max-w-md px-5 py-24">
-        <div className="h-64 w-full animate-pulse rounded-2xl bg-beige-cream dark:bg-dark-grey" />
+        <div className="h-64 w-full animate-pulse rounded-3xl bg-slate-100" />
       </div>
     );
   }
@@ -81,65 +82,79 @@ export default function AccountPage() {
   if (!user) {
     return (
       <div className="mx-auto max-w-md px-5 py-20">
-        <div className="rounded-2xl border border-border-ash p-8 transition-theme dark:border-dark-grey">
-          <div className="mb-6 flex rounded-full border border-border-ash p-1 dark:border-dark-grey">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
+          <div className="mb-6 flex rounded-full border border-slate-200 bg-slate-50 p-1">
             <button
+              type="button"
               onClick={() => setMode("login")}
-              className={`flex-1 rounded-full py-2 text-xs uppercase tracking-widest transition-theme ${
-                mode === "login" ? "bg-luxury-black text-pure-white dark:bg-pure-white dark:text-luxury-black" : "text-ash-grey"
+              className={`flex-1 rounded-full py-2 text-xs font-semibold uppercase tracking-wider transition-all ${
+                mode === "login" ? "bg-slate-900 text-white shadow-xs" : "text-slate-500 hover:text-slate-900"
               }`}
             >
               Login
             </button>
             <button
+              type="button"
               onClick={() => setMode("signup")}
-              className={`flex-1 rounded-full py-2 text-xs uppercase tracking-widest transition-theme ${
-                mode === "signup" ? "bg-luxury-black text-pure-white dark:bg-pure-white dark:text-luxury-black" : "text-ash-grey"
+              className={`flex-1 rounded-full py-2 text-xs font-semibold uppercase tracking-wider transition-all ${
+                mode === "signup" ? "bg-slate-900 text-white shadow-xs" : "text-slate-500 hover:text-slate-900"
               }`}
             >
               Sign Up
             </button>
           </div>
 
-          <h1 className="mb-6 text-center font-display text-2xl tracking-wide text-luxury-black dark:text-pure-white">
+          <h1 className="mb-6 text-center font-display text-2xl font-bold text-slate-900">
             {mode === "login" ? "Welcome Back" : "Create Your Account"}
           </h1>
 
           <form onSubmit={handleAuthSubmit} className="space-y-4">
             {mode === "signup" && (
               <>
-                <input
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Full name"
-                  className="w-full rounded-lg border border-border-ash bg-transparent px-4 py-3 text-sm text-luxury-black outline-none placeholder:text-ash-grey dark:border-dark-grey dark:text-pure-white"
-                />
-                <input
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Phone number"
-                  className="w-full rounded-lg border border-border-ash bg-transparent px-4 py-3 text-sm text-luxury-black outline-none placeholder:text-ash-grey dark:border-dark-grey dark:text-pure-white"
-                />
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Full Name</label>
+                  <input
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    placeholder="e.g. John Doe"
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs font-medium text-slate-900 outline-none focus:border-slate-400"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Phone Number</label>
+                  <input
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="e.g. +233..."
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs font-medium text-slate-900 outline-none focus:border-slate-400"
+                  />
+                </div>
               </>
             )}
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email address"
-              className="w-full rounded-lg border border-border-ash bg-transparent px-4 py-3 text-sm text-luxury-black outline-none placeholder:text-ash-grey dark:border-dark-grey dark:text-pure-white"
-            />
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              className="w-full rounded-lg border border-border-ash bg-transparent px-4 py-3 text-sm text-luxury-black outline-none placeholder:text-ash-grey dark:border-dark-grey dark:text-pure-white"
-            />
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Email Address</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@example.com"
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs font-medium text-slate-900 outline-none focus:border-slate-400"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs font-medium text-slate-900 outline-none focus:border-slate-400"
+              />
+            </div>
             <button
               type="submit"
               disabled={submitting}
-              className="w-full rounded-full bg-luxury-black px-6 py-3.5 text-xs uppercase tracking-[0.2em] text-pure-white transition-transform hover:scale-[1.02] disabled:opacity-50 dark:bg-pure-white dark:text-luxury-black"
+              className="w-full rounded-2xl bg-slate-900 px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-white shadow transition-all hover:bg-slate-800 disabled:opacity-50"
             >
               {submitting ? "Please wait..." : mode === "login" ? "Login" : "Create Account"}
             </button>
@@ -150,27 +165,31 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-5 py-14 sm:px-8">
-      <h1 className="mb-8 font-display text-4xl tracking-wide text-luxury-black dark:text-pure-white">My Account</h1>
+    <div className="mx-auto max-w-4xl px-4 py-10 sm:px-8 pb-24">
+      <h1 className="mb-6 font-display text-3xl font-bold tracking-wide text-slate-900">My Account</h1>
 
-      <div className="mb-8 flex gap-2 border-b border-border-ash dark:border-dark-grey">
-        {[
-          { id: "profile", label: "Profile" },
-          { id: "orders", label: "Orders" },
-        ].map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setSearchParams({ tab: t.id })}
-            className={`px-4 py-3 text-xs uppercase tracking-widest transition-theme ${
-              tab === t.id
-                ? "border-b-2 border-luxury-black text-luxury-black dark:border-pure-white dark:text-pure-white"
-                : "text-ash-grey"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      {/* Hide Orders Tab entirely if user is admin */}
+      {!isAdmin && (
+        <div className="mb-8 flex gap-2 border-b border-slate-200">
+          {[
+            { id: "profile", label: "Profile" },
+            { id: "orders", label: "Orders" },
+          ].map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setSearchParams({ tab: t.id })}
+              className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider transition-all ${
+                tab === t.id
+                  ? "border-b-2 border-slate-900 text-slate-900"
+                  : "text-slate-400 hover:text-slate-700"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {tab === "profile" && (
         <ProfileTab
@@ -187,12 +206,12 @@ export default function AccountPage() {
         />
       )}
 
-      {tab === "orders" && (
+      {tab === "orders" && !isAdmin && (
         <div>
           {ordersLoading ? (
             <div className="space-y-4">
               {Array.from({ length: 2 }).map((_, i) => (
-                <div key={i} className="h-24 w-full animate-pulse rounded-2xl bg-beige-cream dark:bg-dark-grey" />
+                <div key={i} className="h-28 w-full animate-pulse rounded-3xl bg-slate-100" />
               ))}
             </div>
           ) : orders.length === 0 ? (
@@ -200,66 +219,62 @@ export default function AccountPage() {
           ) : (
             <div className="space-y-5">
               {orders.map((order) => (
-                <div key={order.id} className="rounded-2xl border border-border-ash p-5 transition-theme dark:border-dark-grey">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-sm font-medium text-luxury-black dark:text-pure-white">
+                <div key={order.id} className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-100 pb-3">
+                    <span className="font-mono text-sm font-bold text-slate-900">
                       Order #{order.id.slice(0, 8).toUpperCase()}
                     </span>
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-1.5">
                       <span
-                        className={`rounded-full px-3 py-1 text-[10px] uppercase tracking-widest ${
+                        className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
                           order.status === "delivered"
-                            ? "bg-whatsapp-green/15 text-whatsapp-green"
+                            ? "bg-emerald-100 text-emerald-800"
                             : order.status === "cancelled"
-                            ? "bg-alert-red/15 text-alert-red"
-                            : "bg-beige-cream text-luxury-black dark:bg-dark-grey dark:text-pure-white"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-slate-100 text-slate-800"
                         }`}
                       >
-                        {order.status.replace("_", " ")}
+                        {order.status.replace(/_/g, " ")}
                       </span>
                       <span
-                        className={`rounded-full px-3 py-1 text-[10px] uppercase tracking-widest ${
+                        className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
                           order.payment_status === "deposit_paid"
-                            ? "bg-whatsapp-green/15 text-whatsapp-green"
-                            : "bg-alert-red/15 text-alert-red"
+                            ? "bg-emerald-100 text-emerald-800"
+                            : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {order.payment_status === "deposit_paid" ? "Deposit Paid" : "Pending Meetup Payment"}
-                      </span>
-                      <span className="rounded-full bg-beige-cream px-3 py-1 text-[10px] uppercase tracking-widest text-luxury-black dark:bg-dark-grey dark:text-pure-white">
-                        {order.payment_method === "paystack_deposit" ? "Paystack Deposit" : "Meetup"}
-                      </span>
-                      <span className="rounded-full bg-beige-cream px-3 py-1 text-[10px] uppercase tracking-widest text-luxury-black dark:bg-dark-grey dark:text-pure-white">
-                        {(order.meetup_status ?? "pending").replace("_", " ")}
+                        {order.payment_status === "deposit_paid" ? "Deposit Paid" : "Pending Payment"}
                       </span>
                     </div>
                   </div>
-                  <p className="mt-1 text-xs text-ash-grey">{new Date(order.created_at).toLocaleString()}</p>
-                  <div className="mt-3 grid grid-cols-1 gap-2 text-xs text-ash-grey sm:grid-cols-3">
+                  <p className="text-[11px] text-slate-400">Placed on {new Date(order.created_at).toLocaleString()}</p>
+                  
+                  <div className="grid grid-cols-1 gap-2 rounded-2xl bg-slate-50 p-3 text-xs text-slate-600 sm:grid-cols-3">
                     <p>
-                      <span className="text-luxury-black dark:text-pure-white">Total:</span>{" "}
-                      {formatPrice(order.total_amount ?? order.total ?? 0)}
+                      <strong className="text-slate-900">Total:</strong> {formatPrice(order.total_amount ?? order.total ?? 0)}
                     </p>
                     <p>
-                      <span className="text-luxury-black dark:text-pure-white">Deposit:</span> {formatPrice(order.deposit_amount ?? 0)}
+                      <strong className="text-slate-900">Deposit:</strong> {formatPrice(order.deposit_amount ?? 0)}
                     </p>
                     <p>
-                      <span className="text-luxury-black dark:text-pure-white">Balance:</span> {formatPrice(order.remaining_balance ?? 0)}
+                      <strong className="text-slate-900">Balance:</strong> {formatPrice(order.remaining_balance ?? 0)}
                     </p>
                   </div>
-                  <div className="mt-3 space-y-1">
+
+                  <div className="space-y-1.5 pt-1">
                     {(Array.isArray(order.items) ? order.items : []).map((it, idx) => (
-                      <div key={idx} className="flex justify-between text-sm text-ash-grey">
-                        <span>
+                      <div key={idx} className="flex items-center justify-between text-xs text-slate-600">
+                        <span className="truncate pr-2">
                           {it.quantity}x {it.name}
                         </span>
-                        <span>{formatPrice(it.price * it.quantity)}</span>
+                        <span className="shrink-0 font-medium text-slate-900">{formatPrice(it.price * it.quantity)}</span>
                       </div>
                     ))}
                   </div>
-                  <div className="mt-3 flex justify-between border-t border-border-ash pt-3 text-sm font-medium text-luxury-black transition-theme dark:border-dark-grey dark:text-pure-white">
-                    <span>Total</span>
-                    <span>{formatPrice(order.total_amount ?? order.total ?? 0)}</span>
+
+                  <div className="flex items-center justify-between border-t border-slate-100 pt-3 text-xs font-bold text-slate-900">
+                    <span>Final Amount</span>
+                    <span className="font-display text-sm">{formatPrice(order.total_amount ?? order.total ?? 0)}</span>
                   </div>
                 </div>
               ))}
@@ -289,9 +304,16 @@ function ProfileTab({
   onSignOut: () => void;
 }) {
   const { showToast } = useToast();
+  const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(displayName);
   const [phoneNumber, setPhoneNumber] = useState(phone);
   const [saving, setSaving] = useState(false);
+
+  // Sync internal state if props change from Supabase
+  useEffect(() => {
+    setName(displayName);
+    setPhoneNumber(phone);
+  }, [displayName, phone]);
 
   async function save() {
     setSaving(true);
@@ -301,43 +323,96 @@ function ProfileTab({
       showToast(error, "error");
       return;
     }
-    showToast("Profile updated.", "success");
+    showToast("Profile updated successfully.", "success");
+    setIsEditing(false);
+  }
+
+  function handleCancel() {
+    setName(displayName);
+    setPhoneNumber(phone);
+    setIsEditing(false);
   }
 
   return (
-    <div className="max-w-lg space-y-4 rounded-2xl border border-soft-grey/40 bg-pure-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-theme dark:border-dark-border dark:bg-dark-card dark:shadow-[0_1px_3px_rgba(0,0,0,0.2)]">
-      <div>
-        <span className="text-xs uppercase tracking-widest text-muted-grey dark:text-dark-muted">Email</span>
-        <p className="text-sm text-luxury-black dark:text-dark-text">{email}</p>
+    <div className="max-w-xl space-y-6 rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
+      {/* Header Row with Title and Edit Icon Button */}
+      <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+        <h2 className="font-display text-lg font-bold text-slate-900">Profile Details</h2>
+        {!isEditing && (
+          <button
+            type="button"
+            onClick={() => setIsEditing(true)}
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-xs hover:bg-slate-50 transition-colors"
+            title="Edit Profile"
+          >
+            ✏️
+          </button>
+        )}
       </div>
-      <div className="space-y-1">
-        <span className="text-xs uppercase tracking-widest text-muted-grey dark:text-dark-muted">Display Name</span>
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-lg border border-soft-grey/60 bg-transparent px-4 py-3 text-sm text-luxury-black outline-none placeholder:text-muted-grey dark:border-dark-border dark:text-dark-text"
-        />
-      </div>
-      <div className="space-y-1">
-        <span className="text-xs uppercase tracking-widest text-muted-grey dark:text-dark-muted">Phone</span>
-        <input
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-          className="w-full rounded-lg border border-soft-grey/60 bg-transparent px-4 py-3 text-sm text-luxury-black outline-none placeholder:text-muted-grey dark:border-dark-border dark:text-dark-text"
-        />
-      </div>
-      <button
-        onClick={save}
-        disabled={saving}
-        className="flex h-12 w-full items-center justify-center rounded-full bg-luxury-black px-6 text-xs uppercase tracking-widest text-pure-white transition-all duration-250 hover:scale-[1.02] disabled:opacity-50 dark:bg-dark-accent dark:text-luxury-black"
-      >
-        {saving ? "Saving..." : "Save Changes"}
-      </button>
 
+      {/* Profile Details Container: Saved Format vs Edit Form */}
+      <div className="space-y-4">
+        <div className="space-y-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Email Address</span>
+          <p className="text-xs font-semibold text-slate-900">{email}</p>
+        </div>
+
+        {isEditing ? (
+          <>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Display Name</label>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs font-medium text-slate-900 outline-none focus:border-slate-400"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Phone Number</label>
+              <input
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs font-medium text-slate-900 outline-none focus:border-slate-400"
+              />
+            </div>
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="flex-1 rounded-2xl border border-slate-200 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={save}
+                disabled={saving}
+                className="flex-1 rounded-2xl bg-slate-900 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white shadow transition-all hover:bg-slate-800 disabled:opacity-50"
+              >
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 space-y-3">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Display Name</span>
+              <p className="text-xs font-semibold text-slate-900 mt-0.5">{displayName || "Not set"}</p>
+            </div>
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Phone Number</span>
+              <p className="text-xs font-semibold text-slate-900 mt-0.5">{phone || "Not set"}</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Admin Quick Action Button */}
       {isAdmin && (
         <button
+          type="button"
           onClick={onGoAdmin}
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-full border border-luxury-black text-xs uppercase tracking-widest text-luxury-black transition-all duration-250 hover:bg-luxury-black hover:text-pure-white dark:border-dark-accent dark:text-dark-accent dark:hover:bg-dark-accent dark:hover:text-luxury-black"
+          className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-slate-900 bg-slate-900 px-6 text-xs font-semibold uppercase tracking-wider text-white shadow transition-all hover:bg-slate-800"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="3" width="7" height="9" />
@@ -349,7 +424,17 @@ function ProfileTab({
         </button>
       )}
 
-      <button onClick={onSignOut} className="block h-12 w-full rounded-full border border-alert-red px-6 text-center text-xs uppercase tracking-widest text-alert-red transition-all duration-250 hover:bg-alert-red/10">
+      {/* Sign Out Button with Icon */}
+      <button
+        type="button"
+        onClick={onSignOut}
+        className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-6 text-xs font-semibold uppercase tracking-wider text-red-600 transition-colors hover:bg-red-100"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
         Sign Out
       </button>
     </div>

@@ -1,11 +1,25 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import type { Category, Product } from "../lib/types";
-import ProductCard from "../components/ProductCard";
+import { safeImages } from "../lib/helpers";
 import EmptyState from "../components/EmptyState";
 
 type SortOption = "newest" | "price_asc" | "price_desc" | "name";
+
+function formatCompactAmount(value: number | null | undefined): string {
+  const n = typeof value === "number" && !Number.isNaN(value) ? value : 0;
+  if (n >= 1_000_000_000) {
+    return "GH₵" + (n / 1_000_000_000).toFixed(1).replace(/\.0$/, "") + "B";
+  }
+  if (n >= 1_000_000) {
+    return "GH₵" + (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+  }
+  if (n >= 1_000) {
+    return "GH₵" + (n / 1_000).toFixed(1).replace(/\.0$/, "") + "k";
+  }
+  return "GH₵" + n.toLocaleString();
+}
 
 export default function Shop() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -15,6 +29,7 @@ export default function Shop() {
 
   const search = searchParams.get("search") || "";
   const categoryFilter = searchParams.get("category") || "";
+  const mediumFilter = searchParams.get("medium") || "";
   const sort = (searchParams.get("sort") as SortOption) || "newest";
 
   useEffect(() => {
@@ -34,6 +49,15 @@ export default function Shop() {
     };
   }, []);
 
+  // Extract unique mediums for the medium filter dropdown
+  const availableMediums = useMemo(() => {
+    const set = new Set<string>();
+    products.forEach((p) => {
+      if (p.medium) set.add(p.medium.trim());
+    });
+    return Array.from(set).sort();
+  }, [products]);
+
   const filtered = useMemo(() => {
     let list = [...products];
     if (search.trim()) {
@@ -44,6 +68,9 @@ export default function Shop() {
     }
     if (categoryFilter) {
       list = list.filter((p) => p.category_id === categoryFilter);
+    }
+    if (mediumFilter) {
+      list = list.filter((p) => p.medium?.toLowerCase() === mediumFilter.toLowerCase());
     }
     switch (sort) {
       case "price_asc":
@@ -59,7 +86,7 @@ export default function Shop() {
         list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
     return list;
-  }, [products, search, categoryFilter, sort]);
+  }, [products, search, categoryFilter, mediumFilter, sort]);
 
   function updateParam(key: string, value: string) {
     const next = new URLSearchParams(searchParams);
@@ -69,32 +96,41 @@ export default function Shop() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8">
-      <div className="mb-10 text-center">
-        <h1 className="font-display text-4xl tracking-wide text-luxury-black dark:text-dark-text">The Gallery</h1>
-        <p className="mt-3 text-sm text-muted-grey dark:text-dark-muted">Explore original paintings and masterworks from the collection.</p>
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-8 pb-24 space-y-6">
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-wide text-slate-900">
+          The Gallery
+        </h1>
+        <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto">
+          Explore original paintings and masterworks from the collection.
+        </p>
       </div>
 
-      <div className="mb-10 flex flex-col gap-4 border-y border-soft-grey/40 py-5 dark:border-dark-border sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap items-center gap-2">
+      {/* Filter and Control Bar */}
+      <div className="flex flex-col gap-4 border-y border-slate-200 py-4">
+        {/* Horizontal Scrollable Categories Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none shrink-0">
           <button
+            type="button"
             onClick={() => updateParam("category", "")}
-            className={`rounded-full border px-4 py-1.5 text-xs uppercase tracking-widest transition-all duration-200 ${
+            className={`shrink-0 rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all shadow-xs ${
               !categoryFilter
-                ? "border-luxury-black bg-luxury-black text-pure-white dark:border-dark-accent dark:bg-dark-accent dark:text-luxury-black"
-                : "border-soft-grey/60 text-muted-grey dark:border-dark-border dark:text-dark-muted"
+                ? "border-slate-900 bg-slate-900 text-white"
+                : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
             }`}
           >
-            All
+            All Collections
           </button>
           {categories.map((cat) => (
             <button
               key={cat.id}
+              type="button"
               onClick={() => updateParam("category", cat.id)}
-              className={`rounded-full border px-4 py-1.5 text-xs uppercase tracking-widest transition-all duration-200 ${
+              className={`shrink-0 rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all shadow-xs ${
                 categoryFilter === cat.id
-                  ? "border-luxury-black bg-luxury-black text-pure-white dark:border-dark-accent dark:bg-dark-accent dark:text-luxury-black"
-                  : "border-soft-grey/60 text-muted-grey dark:border-dark-border dark:text-dark-muted"
+                  ? "border-slate-900 bg-slate-900 text-white"
+                  : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
               }`}
             >
               {cat.name}
@@ -102,19 +138,35 @@ export default function Shop() {
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
-          <input
-            value={search}
-            onChange={(e) => updateParam("search", e.target.value)}
-            placeholder="Search artworks..."
-            className="w-44 border-b border-soft-grey/60 bg-transparent py-1.5 text-sm text-luxury-black outline-none placeholder:text-muted-grey dark:border-dark-border dark:text-dark-text sm:w-56"
-          />
+        {/* Secondary Controls: Search, Medium Filter, and Sort */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
+            <input
+              value={search}
+              onChange={(e) => updateParam("search", e.target.value)}
+              placeholder="Search artworks..."
+              className="w-full sm:w-56 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-900 outline-none focus:border-slate-400 shadow-xs placeholder:text-slate-400"
+            />
+            <select
+              value={mediumFilter}
+              onChange={(e) => updateParam("medium", e.target.value)}
+              className="w-full sm:w-auto rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-wider text-slate-900 outline-none shadow-xs"
+            >
+              <option value="">All Mediums</option>
+              {availableMediums.map((med) => (
+                <option key={med} value={med}>
+                  {med}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <select
             value={sort}
             onChange={(e) => updateParam("sort", e.target.value)}
-            className="rounded-full border border-soft-grey/60 bg-transparent px-3 py-1.5 text-xs uppercase tracking-widest text-luxury-black outline-none dark:border-dark-border dark:bg-dark-card dark:text-dark-text"
+            className="w-full sm:w-auto rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-wider text-slate-900 outline-none shadow-xs"
           >
-            <option value="newest">Newest</option>
+            <option value="newest">Newest First</option>
             <option value="price_asc">Price: Low to High</option>
             <option value="price_desc">Price: High to Low</option>
             <option value="name">Name A–Z</option>
@@ -122,26 +174,63 @@ export default function Shop() {
         </div>
       </div>
 
+      {/* Artworks Grid Display: 2 on mobile, 3 on desktop */}
       {loading ? (
-        <div className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-6">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="aspect-[3/4] w-full animate-pulse rounded-2xl bg-soft-grey/30 dark:bg-dark-card" />
+        <div className="grid grid-cols-2 gap-3 sm:gap-6 sm:grid-cols-3 max-w-5xl mx-auto">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="aspect-4/5 w-full animate-pulse rounded-3xl bg-slate-100" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
         <EmptyState
-          title="No artworks yet"
+          title="No artworks found"
           message={
             products.length === 0
               ? "Our collection is being curated. Please check back soon."
-              : "No artworks match your filters. Try adjusting your search."
+              : "No artworks match your search or filters."
           }
         />
       ) : (
-        <div className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-6">
-          {filtered.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+        <div className="grid grid-cols-2 gap-3 sm:gap-6 sm:grid-cols-3 max-w-5xl mx-auto">
+          {filtered.map((product) => {
+            const image = safeImages(product.images)[0];
+            return (
+              <Link
+                key={product.id}
+                to={`/product/${product.slug || product.id}`}
+                className="group relative block aspect-4/5 w-full overflow-hidden rounded-3xl bg-slate-100 shadow-sm transition-all hover:shadow-md"
+              >
+                {image ? (
+                  <img
+                    src={image}
+                    alt={product.name}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-xs text-slate-400">No Image</div>
+                )}
+                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="absolute left-2.5 top-2.5 z-10 flex flex-col gap-1">
+                  {product.new_arrival && (
+                    <span className="rounded-full bg-white/90 backdrop-blur-xs px-2 py-0.5 text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-slate-900 shadow-xs">
+                      New
+                    </span>
+                  )}
+                </div>
+                <div className="absolute inset-x-0 bottom-0 z-10 p-3.5 sm:p-5 space-y-0.5 sm:space-y-1">
+                  <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-amber-400 block truncate">
+                    {product.medium || "Original Art"}
+                  </span>
+                  <h3 className="font-display text-xs sm:text-base font-bold text-white truncate">
+                    {product.title || product.name}
+                  </h3>
+                  <p className="font-display text-xs sm:text-sm font-semibold text-slate-200">
+                    {formatCompactAmount(product.price)}
+                  </p>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
