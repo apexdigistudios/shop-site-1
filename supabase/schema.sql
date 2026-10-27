@@ -1,251 +1,480 @@
--- The Christy Black Art Gallery — Supabase schema
--- Run this in the Supabase SQL editor. Also create a public storage bucket named "images".
+BEGIN;
 
-create extension if not exists "uuid-ossp";
+-- ---------------------------------------------------------------------
+-- Tables
+-- ---------------------------------------------------------------------
 
--- USERS ---------------------------------------------------------------
-create table if not exists users (
-  id uuid primary key references auth.users(id) on delete cascade,
+CREATE TABLE IF NOT EXISTS public.users (
+  id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   display_name text,
   phone text,
-  role text not null default 'customer' check (role in ('customer','admin')),
-  created_at timestamptz not null default now()
+  role text NOT NULL DEFAULT 'customer'
+    CHECK (role IN ('customer', 'admin')),
+  created_at timestamptz NOT NULL DEFAULT now()
 );
 
--- CATEGORIES ---------------------------------------------------------------
-create table if not exists categories (
-  id uuid primary key default uuid_generate_v4(),
-  name text not null,
+CREATE TABLE IF NOT EXISTS public.categories (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
   description text,
   image text,
-  created_at timestamptz not null default now()
+  created_at timestamptz NOT NULL DEFAULT now()
 );
 
--- PRODUCTS ---------------------------------------------------------------
-create table if not exists products (
-  id uuid primary key default uuid_generate_v4(),
-  name text not null,
+CREATE TABLE IF NOT EXISTS public.products (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
   title text,
-  artist text not null default 'Christy Black',
+  artist text DEFAULT 'Christy Black',
   medium text,
   dimensions text,
-  availability_status text not null default 'Available' check (availability_status in ('Available','Reserved','Sold')),
-  slug text unique not null,
+  availability_status text NOT NULL DEFAULT 'Available'
+    CHECK (availability_status IN ('Available', 'Reserved', 'Sold')),
+  slug text NOT NULL UNIQUE,
   description text,
   long_description text,
-  price numeric not null default 0,
-  compare_price numeric,
-  images text[] default '{}',
-  sizes text[] default '{}',
-  colors jsonb default '[]',
-  stock_status text not null default 'in_stock' check (stock_status in ('in_stock','out_of_stock','preorder')),
-  featured boolean not null default false,
-  new_arrival boolean not null default false,
-  sku text,
-  category_id uuid references categories(id) on delete set null,
-  visibility boolean not null default true,
-  created_at timestamptz not null default now()
+  price numeric(12, 2) NOT NULL DEFAULT 0 CHECK (price >= 0),
+  compare_price numeric(12, 2) CHECK (compare_price IS NULL OR compare_price >= 0),
+  images text[] DEFAULT ARRAY[]::text[],
+  sizes text[],
+  colors jsonb CHECK (colors IS NULL OR jsonb_typeof(colors) = 'array'),
+  stock_status text NOT NULL DEFAULT 'in_stock'
+    CHECK (stock_status IN ('in_stock', 'out_of_stock', 'preorder')),
+  featured boolean NOT NULL DEFAULT false,
+  new_arrival boolean NOT NULL DEFAULT false,
+  sku text UNIQUE,
+  category_id uuid REFERENCES public.categories(id) ON DELETE SET NULL,
+  visibility boolean NOT NULL DEFAULT true,
+  created_at timestamptz NOT NULL DEFAULT now()
 );
 
--- Artwork details and compatibility migration for existing product records.
-alter table products add column if not exists title text;
-alter table products add column if not exists artist text not null default 'Christy Black';
-alter table products add column if not exists medium text;
-alter table products add column if not exists dimensions text;
-alter table products add column if not exists availability_status text not null default 'Available';
-update products set title = name where title is null;
-update products
-set availability_status = case
-  when stock_status = 'out_of_stock' then 'Sold'
-  when stock_status = 'preorder' then 'Reserved'
-  else 'Available'
-end
-where availability_status = 'Available' and stock_status <> 'in_stock';
-do $$
-begin
-  if not exists (
-    select 1 from pg_constraint
-    where conname = 'products_availability_status_check'
-      and conrelid = 'products'::regclass
-  ) then
-    alter table products add constraint products_availability_status_check
-      check (availability_status in ('Available','Reserved','Sold'));
-  end if;
-end $$;
-
--- ORDERS ---------------------------------------------------------------
-create table if not exists orders (
-  id uuid primary key default uuid_generate_v4(),
-  user_id uuid references users(id) on delete set null,
-  items jsonb not null default '[]',
-  total numeric not null default 0,
-  total_amount numeric not null default 0,
-  deposit_amount numeric not null default 0,
-  remaining_balance numeric not null default 0,
-  status text not null default 'pending' check (status in ('pending','pending_payment','processing','shipped','delivered','cancelled')),
-  payment_method text not null default 'meetup' check (payment_method in ('paystack_deposit','meetup')),
-  payment_status text not null default 'pending_meetup_payment' check (payment_status in ('deposit_paid','pending_meetup_payment')),
-  meetup_status text not null default 'awaiting_meetup' check (meetup_status in ('awaiting_meetup','arranged','completed','cancelled')),
-  customer_name text,
-  customer_phone text,
-  customer_address text,
-  created_at timestamptz not null default now()
-);
-
-alter table orders add column if not exists total_amount numeric not null default 0;
-alter table orders add column if not exists deposit_amount numeric not null default 0;
-alter table orders add column if not exists remaining_balance numeric not null default 0;
-alter table orders add column if not exists meetup_status text not null default 'awaiting_meetup';
-
--- CART ---------------------------------------------------------------
-create table if not exists cart (
-  id uuid primary key default uuid_generate_v4(),
-  user_id uuid references users(id) on delete cascade,
-  product_id uuid references products(id) on delete cascade,
-  quantity int not null default 1,
+CREATE TABLE IF NOT EXISTS public.cart (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  product_id uuid NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
+  quantity integer NOT NULL DEFAULT 1 CHECK (quantity > 0),
   size text,
   color text
 );
 
--- WISHLIST ---------------------------------------------------------------
-create table if not exists wishlist (
-  id uuid primary key default uuid_generate_v4(),
-  user_id uuid references users(id) on delete cascade,
-  product_id uuid references products(id) on delete cascade
+CREATE TABLE IF NOT EXISTS public.wishlist (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  product_id uuid NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
+  CONSTRAINT wishlist_user_product_unique UNIQUE (user_id, product_id)
 );
 
--- REVIEWS ---------------------------------------------------------------
-create table if not exists reviews (
-  id uuid primary key default uuid_generate_v4(),
-  product_id uuid references products(id) on delete cascade,
-  user_id uuid references users(id) on delete set null,
-  reviewer_name text,
-  rating int not null check (rating between 1 and 5),
+CREATE TABLE IF NOT EXISTS public.reviews (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  product_id uuid NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
+  user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+  rating integer NOT NULL CHECK (rating BETWEEN 1 AND 5),
   comment text,
-  approved boolean not null default false,
-  created_at timestamptz not null default now()
+  created_at timestamptz NOT NULL DEFAULT now(),
+  approved boolean NOT NULL DEFAULT false,
+  reviewer_name text
 );
 
--- COUPONS ---------------------------------------------------------------
-create table if not exists coupons (
-  id uuid primary key default uuid_generate_v4(),
-  code text unique not null,
-  discount numeric not null default 0,
-  active boolean not null default true
+CREATE TABLE IF NOT EXISTS public.orders (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+  items jsonb NOT NULL DEFAULT '[]'::jsonb
+    CHECK (jsonb_typeof(items) = 'array'),
+  total numeric(12, 2),
+  total_amount numeric(12, 2) NOT NULL CHECK (total_amount >= 0),
+  deposit_amount numeric(12, 2) NOT NULL DEFAULT 0 CHECK (deposit_amount >= 0),
+  remaining_balance numeric(12, 2) NOT NULL DEFAULT 0 CHECK (remaining_balance >= 0),
+  status text NOT NULL DEFAULT 'pending'
+    CHECK (status IN ('pending', 'pending_payment', 'processing', 'shipped', 'delivered', 'cancelled')),
+  payment_method text NOT NULL
+    CHECK (payment_method IN ('paystack_deposit', 'meetup')),
+  payment_status text NOT NULL
+    CHECK (payment_status IN ('deposit_paid', 'pending_meetup_payment')),
+  meetup_status text NOT NULL DEFAULT 'awaiting_meetup'
+    CHECK (meetup_status IN ('awaiting_meetup', 'arranged', 'completed', 'cancelled')),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  customer_name text,
+  customer_phone text,
+  customer_address text,
+  CONSTRAINT orders_amounts_balance
+    CHECK (deposit_amount + remaining_balance = total_amount)
 );
 
--- TESTIMONIALS ---------------------------------------------------------------
-create table if not exists testimonials (
-  id uuid primary key default uuid_generate_v4(),
-  name text not null,
-  message text not null,
+CREATE TABLE IF NOT EXISTS public.coupons (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  code text NOT NULL,
+  discount numeric(5, 2) NOT NULL CHECK (discount BETWEEN 0 AND 100),
+  active boolean NOT NULL DEFAULT true
+);
+
+CREATE TABLE IF NOT EXISTS public.testimonials (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  message text NOT NULL,
   image text
 );
 
--- HOME TEXT ---------------------------------------------------------------
-create table if not exists home_text (
-  id uuid primary key default uuid_generate_v4(),
-  hero_title text not null default 'The Christy Black Art Gallery',
-  hero_subtitle text not null default 'Discover original paintings and masterworks by Christy Black.',
-  about_text text not null default 'The Christy Black Art Gallery presents a collection of original paintings, created with expressive technique and enduring vision.',
+CREATE TABLE IF NOT EXISTS public.home_text (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  hero_title text NOT NULL DEFAULT 'The Christy Black Art Gallery',
+  hero_subtitle text NOT NULL DEFAULT 'Discover original paintings and masterworks by Christy Black.',
+  about_text text NOT NULL DEFAULT 'The Christy Black Art Gallery presents a collection of original paintings, created with expressive technique and enduring vision.',
   logo_url text,
-  paystack_enabled boolean not null default false
+  paystack_enabled boolean NOT NULL DEFAULT false
 );
 
--- Migration for existing databases:
-alter table home_text add column if not exists logo_url text;
-alter table home_text add column if not exists paystack_enabled boolean not null default false;
+-- Case-insensitive coupon lookup uses ilike in the application.
+CREATE UNIQUE INDEX IF NOT EXISTS coupons_code_case_insensitive_uidx
+  ON public.coupons (lower(code));
 
-insert into home_text (hero_title, hero_subtitle, about_text)
-select 'The Christy Black Art Gallery', 'Discover original paintings and masterworks by Christy Black.', 'The Christy Black Art Gallery presents a collection of original paintings, created with expressive technique and enduring vision.'
-where not exists (select 1 from home_text);
+CREATE INDEX IF NOT EXISTS products_category_id_idx
+  ON public.products (category_id);
 
-update home_text
-set hero_title = 'The Christy Black Art Gallery'
-where hero_title = 'ADOB''S IMPORTS HUB';
-update home_text
-set hero_subtitle = 'Discover original paintings and masterworks by Christy Black.'
-where hero_subtitle = 'Curated luxury imports, delivered with editorial precision.';
-update home_text
-set about_text = 'The Christy Black Art Gallery presents a collection of original paintings, created with expressive technique and enduring vision.'
-where about_text = 'We source the finest imported pieces for the modern connoisseur.';
+CREATE INDEX IF NOT EXISTS products_visible_featured_created_idx
+  ON public.products (created_at DESC)
+  WHERE visibility = true AND featured = true;
 
--- ROW LEVEL SECURITY -------------------------------------------------------
-alter table users enable row level security;
-alter table categories enable row level security;
-alter table products enable row level security;
-alter table orders enable row level security;
-alter table cart enable row level security;
-alter table wishlist enable row level security;
-alter table reviews enable row level security;
-alter table coupons enable row level security;
-alter table testimonials enable row level security;
-alter table home_text enable row level security;
+CREATE INDEX IF NOT EXISTS cart_user_id_idx
+  ON public.cart (user_id);
 
--- Public read for storefront content
-create policy "public read categories" on categories for select using (true);
-create policy "public read products" on products for select using (true);
-create policy "public read testimonials" on testimonials for select using (true);
-create policy "public read home_text" on home_text for select using (true);
-create policy "public read approved reviews" on reviews for select using (true);
-create policy "public read coupons" on coupons for select using (true);
+CREATE INDEX IF NOT EXISTS wishlist_user_id_idx
+  ON public.wishlist (user_id);
 
--- Admin full access (checks users.role = 'admin')
-create policy "admin manage categories" on categories for all using (
-  exists (select 1 from users where id = auth.uid() and role = 'admin')
-) with check (
-  exists (select 1 from users where id = auth.uid() and role = 'admin')
-);
+CREATE INDEX IF NOT EXISTS reviews_product_approved_created_idx
+  ON public.reviews (product_id, approved, created_at DESC);
 
-create policy "admin manage products" on products for all using (
-  exists (select 1 from users where id = auth.uid() and role = 'admin')
-) with check (
-  exists (select 1 from users where id = auth.uid() and role = 'admin')
-);
+CREATE INDEX IF NOT EXISTS orders_user_created_idx
+  ON public.orders (user_id, created_at DESC);
 
-create policy "admin manage testimonials" on testimonials for all using (
-  exists (select 1 from users where id = auth.uid() and role = 'admin')
-) with check (
-  exists (select 1 from users where id = auth.uid() and role = 'admin')
-);
+CREATE INDEX IF NOT EXISTS orders_created_idx
+  ON public.orders (created_at DESC);
 
-create policy "admin manage home_text" on home_text for all using (
-  exists (select 1 from users where id = auth.uid() and role = 'admin')
-) with check (
-  exists (select 1 from users where id = auth.uid() and role = 'admin')
-);
+-- ---------------------------------------------------------------------
+-- Admin helper and role protection
+-- The SECURITY DEFINER lookup avoids recursive RLS evaluation on users.
+-- ---------------------------------------------------------------------
 
-create policy "admin manage coupons" on coupons for all using (
-  exists (select 1 from users where id = auth.uid() and role = 'admin')
-) with check (
-  exists (select 1 from users where id = auth.uid() and role = 'admin')
-);
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.users AS u
+    WHERE u.id = auth.uid()
+      AND u.role = 'admin'
+  );
+$$;
 
-create policy "admin manage reviews" on reviews for all using (
-  exists (select 1 from users where id = auth.uid() and role = 'admin')
-) with check (
-  exists (select 1 from users where id = auth.uid() and role = 'admin')
-);
+REVOKE ALL ON FUNCTION public.is_admin() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.is_admin() TO anon, authenticated, service_role;
 
-create policy "users insert own review" on reviews for insert with check (auth.uid() = user_id or user_id is null);
+CREATE OR REPLACE FUNCTION public.guard_user_role_change()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = ''
+AS $$
+BEGIN
+  IF NEW.role IS DISTINCT FROM OLD.role
+     AND NOT public.is_admin()
+     AND COALESCE(auth.role(), '') <> 'service_role' THEN
+    RAISE EXCEPTION 'Only admins can change user roles'
+      USING ERRCODE = '42501';
+  END IF;
 
-create policy "admin manage orders" on orders for all using (
-  exists (select 1 from users where id = auth.uid() and role = 'admin')
-) with check (
-  exists (select 1 from users where id = auth.uid() and role = 'admin')
-);
-create policy "users read own orders" on orders for select using (auth.uid() = user_id);
-create policy "users create own orders" on orders for insert with check (auth.uid() = user_id or user_id is null);
-create policy "guests create orders" on orders for insert with check (user_id is null);
+  RETURN NEW;
+END;
+$$;
 
-create policy "users manage own cart" on cart for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
-create policy "users manage own wishlist" on wishlist for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+REVOKE ALL ON FUNCTION public.guard_user_role_change() FROM PUBLIC, anon, authenticated;
 
-create policy "users read own record" on users for select using (auth.uid() = id);
-create policy "users update own record" on users for update using (auth.uid() = id);
-create policy "users insert own record" on users for insert with check (auth.uid() = id);
-create policy "admin read all users" on users for select using (
-  exists (select 1 from users p2 where p2.id = auth.uid() and p2.role = 'admin')
-);
+DROP TRIGGER IF EXISTS users_guard_role_change ON public.users;
+CREATE TRIGGER users_guard_role_change
+  BEFORE UPDATE OF role ON public.users
+  FOR EACH ROW
+  EXECUTE FUNCTION public.guard_user_role_change();
 
--- Storage bucket: create a public bucket named "images" in Supabase Storage UI.
+-- A guest order is returned by the application's INSERT ... SELECT request.
+-- This transaction-local value lets RLS expose only that just-inserted row.
+CREATE OR REPLACE FUNCTION public.capture_guest_order_return_id()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = ''
+AS $$
+BEGIN
+  IF NEW.user_id IS NULL THEN
+    PERFORM pg_catalog.set_config(
+      'app.guest_order_return_id',
+      NEW.id::text,
+      true
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.capture_guest_order_return_id() FROM PUBLIC, anon, authenticated;
+
+DROP TRIGGER IF EXISTS orders_capture_guest_return_id ON public.orders;
+CREATE TRIGGER orders_capture_guest_return_id
+  BEFORE INSERT ON public.orders
+  FOR EACH ROW
+  EXECUTE FUNCTION public.capture_guest_order_return_id();
+
+-- ---------------------------------------------------------------------
+-- Row Level Security
+-- ---------------------------------------------------------------------
+
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.cart ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.wishlist ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.coupons ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.testimonials ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.home_text ENABLE ROW LEVEL SECURITY;
+
+-- Remove policies from the previous schema before installing the
+-- non-recursive policies below.
+DROP POLICY IF EXISTS "public read categories" ON public.categories;
+DROP POLICY IF EXISTS "admin manage categories" ON public.categories;
+DROP POLICY IF EXISTS "public read products" ON public.products;
+DROP POLICY IF EXISTS "admin manage products" ON public.products;
+DROP POLICY IF EXISTS "public read testimonials" ON public.testimonials;
+DROP POLICY IF EXISTS "admin manage testimonials" ON public.testimonials;
+DROP POLICY IF EXISTS "public read home_text" ON public.home_text;
+DROP POLICY IF EXISTS "admin manage home_text" ON public.home_text;
+DROP POLICY IF EXISTS "public read approved reviews" ON public.reviews;
+DROP POLICY IF EXISTS "users insert own review" ON public.reviews;
+DROP POLICY IF EXISTS "admin manage reviews" ON public.reviews;
+DROP POLICY IF EXISTS "public read coupons" ON public.coupons;
+DROP POLICY IF EXISTS "admin manage coupons" ON public.coupons;
+DROP POLICY IF EXISTS "admin manage orders" ON public.orders;
+DROP POLICY IF EXISTS "users read own orders" ON public.orders;
+DROP POLICY IF EXISTS "users create own orders" ON public.orders;
+DROP POLICY IF EXISTS "guests create orders" ON public.orders;
+DROP POLICY IF EXISTS "users manage own cart" ON public.cart;
+DROP POLICY IF EXISTS "users manage own wishlist" ON public.wishlist;
+DROP POLICY IF EXISTS "users read own record" ON public.users;
+DROP POLICY IF EXISTS "users update own record" ON public.users;
+DROP POLICY IF EXISTS "users insert own record" ON public.users;
+DROP POLICY IF EXISTS "admin read all users" ON public.users;
+DROP POLICY IF EXISTS "admin update users" ON public.users;
+DROP POLICY IF EXISTS "guests read inserted order" ON public.orders;
+DROP POLICY IF EXISTS "guests insert reviews" ON public.reviews;
+
+-- Users: profile owners see/edit their profile; admins can manage roles.
+CREATE POLICY "users read own record"
+  ON public.users FOR SELECT TO authenticated
+  USING (id = auth.uid());
+
+CREATE POLICY "admin read all users"
+  ON public.users FOR SELECT TO authenticated
+  USING (public.is_admin());
+
+CREATE POLICY "users insert own record"
+  ON public.users FOR INSERT TO authenticated
+  WITH CHECK (id = auth.uid() AND role = 'customer');
+
+CREATE POLICY "users update own record"
+  ON public.users FOR UPDATE TO authenticated
+  USING (id = auth.uid())
+  WITH CHECK (id = auth.uid());
+
+CREATE POLICY "admin update users"
+  ON public.users FOR UPDATE TO authenticated
+  USING (public.is_admin())
+  WITH CHECK (public.is_admin());
+
+-- Catalog and public content.
+CREATE POLICY "public read categories"
+  ON public.categories FOR SELECT TO anon, authenticated
+  USING (true);
+
+CREATE POLICY "admin manage categories"
+  ON public.categories FOR ALL TO authenticated
+  USING (public.is_admin())
+  WITH CHECK (public.is_admin());
+
+CREATE POLICY "public read products"
+  ON public.products FOR SELECT TO anon, authenticated
+  USING (visibility = true);
+
+CREATE POLICY "admin manage products"
+  ON public.products FOR ALL TO authenticated
+  USING (public.is_admin())
+  WITH CHECK (public.is_admin());
+
+CREATE POLICY "public read testimonials"
+  ON public.testimonials FOR SELECT TO anon, authenticated
+  USING (true);
+
+CREATE POLICY "admin manage testimonials"
+  ON public.testimonials FOR ALL TO authenticated
+  USING (public.is_admin())
+  WITH CHECK (public.is_admin());
+
+CREATE POLICY "public read home_text"
+  ON public.home_text FOR SELECT TO anon, authenticated
+  USING (true);
+
+CREATE POLICY "admin manage home_text"
+  ON public.home_text FOR ALL TO authenticated
+  USING (public.is_admin())
+  WITH CHECK (public.is_admin());
+
+-- Only active coupons are visible to shoppers.
+CREATE POLICY "public read coupons"
+  ON public.coupons FOR SELECT TO anon, authenticated
+  USING (active = true);
+
+CREATE POLICY "admin manage coupons"
+  ON public.coupons FOR ALL TO authenticated
+  USING (public.is_admin())
+  WITH CHECK (public.is_admin());
+
+-- Reviews are public after approval; submissions remain unapproved.
+CREATE POLICY "public read approved reviews"
+  ON public.reviews FOR SELECT TO anon, authenticated
+  USING (approved = true);
+
+CREATE POLICY "users insert own review"
+  ON public.reviews FOR INSERT TO authenticated
+  WITH CHECK (
+    approved = false
+    AND (user_id IS NULL OR user_id = auth.uid())
+  );
+
+CREATE POLICY "guests insert reviews"
+  ON public.reviews FOR INSERT TO anon
+  WITH CHECK (user_id IS NULL AND approved = false);
+
+CREATE POLICY "admin manage reviews"
+  ON public.reviews FOR ALL TO authenticated
+  USING (public.is_admin())
+  WITH CHECK (public.is_admin());
+
+-- Orders: customers can only read their own; admins can manage all.
+CREATE POLICY "users read own orders"
+  ON public.orders FOR SELECT TO authenticated
+  USING (user_id = auth.uid());
+
+CREATE POLICY "guests read inserted order"
+  ON public.orders FOR SELECT TO anon
+  USING (
+    auth.uid() IS NULL
+    AND id = NULLIF(
+      current_setting('app.guest_order_return_id', true),
+      ''
+    )::uuid
+  );
+
+CREATE POLICY "users create own orders"
+  ON public.orders FOR INSERT TO authenticated
+  WITH CHECK (user_id = auth.uid());
+
+CREATE POLICY "guests create orders"
+  ON public.orders FOR INSERT TO anon
+  WITH CHECK (user_id IS NULL);
+
+CREATE POLICY "admin manage orders"
+  ON public.orders FOR ALL TO authenticated
+  USING (public.is_admin())
+  WITH CHECK (public.is_admin());
+
+-- Cart and wishlist rows are strictly user-owned.
+CREATE POLICY "users manage own cart"
+  ON public.cart FOR ALL TO authenticated
+  USING (user_id = auth.uid())
+  WITH CHECK (user_id = auth.uid());
+
+CREATE POLICY "users manage own wishlist"
+  ON public.wishlist FOR ALL TO authenticated
+  USING (user_id = auth.uid())
+  WITH CHECK (user_id = auth.uid());
+
+-- ---------------------------------------------------------------------
+-- Grants: SQL privileges are required in addition to RLS policies.
+-- ---------------------------------------------------------------------
+
+GRANT SELECT ON
+  public.categories,
+  public.products,
+  public.testimonials,
+  public.home_text
+TO anon, authenticated;
+
+GRANT INSERT, UPDATE, DELETE ON
+  public.categories,
+  public.products,
+  public.testimonials,
+  public.home_text
+TO authenticated;
+
+GRANT SELECT ON public.coupons TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.coupons TO authenticated;
+
+GRANT SELECT, INSERT ON public.reviews TO anon, authenticated;
+GRANT UPDATE, DELETE ON public.reviews TO authenticated;
+
+GRANT SELECT, INSERT ON public.orders TO anon, authenticated;
+GRANT UPDATE, DELETE ON public.orders TO authenticated;
+
+GRANT SELECT, INSERT, UPDATE ON public.users TO authenticated;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.cart TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.wishlist TO authenticated;
+
+-- ---------------------------------------------------------------------
+-- Seed required homepage content
+-- ---------------------------------------------------------------------
+
+INSERT INTO public.home_text (hero_title, hero_subtitle, about_text)
+SELECT
+  'The Christy Black Art Gallery',
+  'Discover original paintings and masterworks by Christy Black.',
+  'The Christy Black Art Gallery presents a collection of original paintings, created with expressive technique and enduring vision.'
+WHERE NOT EXISTS (SELECT 1 FROM public.home_text);
+
+-- ---------------------------------------------------------------------
+-- Supabase Storage: public image delivery, admin-only writes
+-- ---------------------------------------------------------------------
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('images', 'images', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public can view gallery images" ON storage.objects;
+DROP POLICY IF EXISTS "Admins can upload gallery images" ON storage.objects;
+DROP POLICY IF EXISTS "Admins can update gallery images" ON storage.objects;
+DROP POLICY IF EXISTS "Admins can delete gallery images" ON storage.objects;
+
+CREATE POLICY "Public can view gallery images"
+  ON storage.objects FOR SELECT TO anon, authenticated
+  USING (bucket_id = 'images');
+
+CREATE POLICY "Admins can upload gallery images"
+  ON storage.objects FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'images' AND public.is_admin());
+
+CREATE POLICY "Admins can update gallery images"
+  ON storage.objects FOR UPDATE TO authenticated
+  USING (bucket_id = 'images' AND public.is_admin())
+  WITH CHECK (bucket_id = 'images' AND public.is_admin());
+
+CREATE POLICY "Admins can delete gallery images"
+  ON storage.objects FOR DELETE TO authenticated
+  USING (bucket_id = 'images' AND public.is_admin());
+
+GRANT SELECT ON storage.objects TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON storage.objects TO authenticated;
+
+COMMIT;
