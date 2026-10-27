@@ -91,7 +91,7 @@ export default function AdminBranding() {
   }
 
   return (
-    <div>
+    <div className="space-y-6 pb-24">
       <AdminSectionHeader
         emoji="🖼️"
         title="Site Branding"
@@ -99,48 +99,35 @@ export default function AdminBranding() {
       />
 
       {loading ? (
-        <div className="mt-8 h-56 w-full max-w-2xl animate-pulse rounded-2xl bg-soft-grey/30 dark:bg-dark-card" />
+        <div className="mt-8 h-56 w-full max-w-2xl animate-pulse rounded-3xl bg-slate-100" />
       ) : (
-        <div className="mt-8 grid max-w-4xl grid-cols-1 gap-6 lg:grid-cols-2">
-          {/* LIGHT PREVIEW */}
-          <div className="rounded-2xl border border-soft-grey/40 bg-pure-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-            <div className="mb-4 flex items-center justify-between">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-grey">Light Preview</p>
-              <span className="rounded-full bg-beige-cream px-2.5 py-1 text-[10px] uppercase tracking-widest text-luxury-black">Header</span>
+        <div className="mt-8 grid max-w-4xl grid-cols-1 gap-6">
+          {/* LOGO PREVIEW CARD */}
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs sm:p-8 space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Logo Preview</p>
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-700">
+                Header Branding
+              </span>
             </div>
-            <div className="flex min-h-[100px] items-center justify-center rounded-xl bg-warm-cream p-6">
+            <div className="flex min-h-[140px] items-center justify-center rounded-2xl border border-slate-100 bg-slate-50 p-6">
               {logoUrl ? (
-                <img src={logoUrl} alt="Logo preview (light)" className="h-14 w-auto max-w-full object-contain" />
+                <img src={logoUrl} alt="Site logo preview" className="h-14 w-auto max-w-full object-contain" />
               ) : (
-                <p className="text-xs text-muted-grey">No logo uploaded — text mark will show</p>
+                <p className="text-xs font-medium text-slate-400">No logo uploaded — standard text mark will display</p>
               )}
             </div>
           </div>
 
-          {/* DARK PREVIEW */}
-          <div className="rounded-2xl border border-soft-grey/40 bg-pure-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:border-dark-border dark:bg-dark-card dark:shadow-[0_1px_3px_rgba(0,0,0,0.2)]">
-            <div className="mb-4 flex items-center justify-between">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-grey dark:text-dark-muted">Dark Preview</p>
-              <span className="rounded-full bg-dark-elevated px-2.5 py-1 text-[10px] uppercase tracking-widest text-dark-text">Header</span>
-            </div>
-            <div className="flex min-h-[100px] items-center justify-center rounded-xl bg-dark-bg p-6">
-              {logoUrl ? (
-                <img src={logoUrl} alt="Logo preview (dark)" className="h-14 w-auto max-w-full object-contain" />
-              ) : (
-                <p className="text-xs text-dark-muted">No logo uploaded — text mark will show</p>
-              )}
-            </div>
-          </div>
-
-          {/* ACTIONS */}
-          <div className="rounded-2xl border border-soft-grey/40 bg-pure-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-theme dark:border-dark-border dark:bg-dark-card dark:shadow-[0_1px_3px_rgba(0,0,0,0.2)] lg:col-span-2">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-grey dark:text-dark-muted">Actions</p>
-            <p className="mt-2 text-xs text-muted-grey dark:text-dark-muted">
-              PNG or SVG recommended. Transparent background works best. Logo will scale to fit the header height (max ~44px).
+          {/* ACTIONS CARD */}
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs sm:p-8 space-y-4">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Branding Actions</p>
+            <p className="text-xs text-slate-500">
+              PNG or SVG recommended. Transparent backgrounds work best. The logo will automatically scale to fit the header height (max ~44px).
             </p>
 
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              <label className="flex h-11 cursor-pointer items-center rounded-full bg-luxury-black px-5 text-xs uppercase tracking-widest text-pure-white transition-all duration-250 hover:scale-[1.02] dark:bg-dark-accent dark:text-luxury-black">
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <label className="flex h-11 cursor-pointer items-center rounded-2xl bg-slate-900 px-5 text-xs font-semibold uppercase tracking-wider text-white shadow transition-all hover:bg-slate-800">
                 {uploading ? "Uploading..." : logoUrl ? "Replace Logo" : "Upload Logo"}
                 <input
                   type="file"
@@ -156,7 +143,7 @@ export default function AdminBranding() {
                   type="button"
                   onClick={handleRemove}
                   disabled={saving}
-                  className="flex h-11 items-center rounded-full border border-alert-red px-5 text-xs uppercase tracking-widest text-alert-red transition-colors duration-200 hover:bg-alert-red/10 disabled:opacity-50"
+                  className="flex h-11 items-center rounded-2xl border border-red-200 bg-red-50 px-5 text-xs font-semibold uppercase tracking-wider text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50"
                 >
                   Remove Logo
                 </button>
@@ -167,7 +154,7 @@ export default function AdminBranding() {
                   href={logoUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex h-11 items-center rounded-full border border-soft-grey/60 px-5 text-xs uppercase tracking-widest text-luxury-black transition-colors duration-200 hover:bg-luxury-black hover:text-pure-white dark:border-dark-border dark:text-dark-text dark:hover:bg-dark-accent dark:hover:text-luxury-black"
+                  className="flex h-11 items-center rounded-2xl border border-slate-200 bg-white px-5 text-xs font-semibold uppercase tracking-wider text-slate-700 transition-colors hover:bg-slate-50 shadow-xs"
                 >
                   Open Full Size
                 </a>
