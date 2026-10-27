@@ -58,10 +58,10 @@ export default function Header() {
   }
 
   return (
-    <header className="global-header fixed inset-x-0 top-0 z-50 h-[76px] border-b border-soft-grey/40 transition-all duration-250 ease-out dark:border-dark-border">
+    <header className="fixed inset-x-0 top-0 z-50 h-[76px] border-b border-black/10 bg-white/80 text-slate-900 backdrop-blur-md transition-all duration-250 ease-out">
       <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-5 sm:px-8">
         {/* BRAND LOGO AREA */}
-        <Link to="/" className="group flex items-center gap-3 transition-opacity duration-200 hover:opacity-80" aria-label="Home">
+        <Link to="gallery-ruby-nine.vercel.app" className="group flex items-center gap-3 transition-opacity duration-200 hover:opacity-80" aria-label="Home">
           {logoUrl ? (
             <img
               src={logoUrl}
@@ -74,14 +74,14 @@ export default function Header() {
             />
           ) : (
             <>
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-luxury-black/15 bg-luxury-black text-pure-white transition-all duration-250 group-hover:scale-105 dark:border-pure-white/15 dark:bg-pure-white dark:text-luxury-black">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-black/10 bg-white text-slate-900 transition-all duration-250 group-hover:scale-105">
                 <span className="font-display text-base font-semibold tracking-tighter">CB</span>
               </div>
               <div className="flex flex-col">
-                <span className="font-display text-lg font-medium leading-none tracking-[0.18em] text-luxury-black dark:text-dark-text">
+                <span className="font-display text-lg font-medium leading-none tracking-[0.18em] text-slate-900">
                   CHRISTY BLACK
                 </span>
-                <span className="text-[9px] font-medium uppercase leading-tight tracking-[0.3em] text-muted-grey dark:text-dark-muted">
+                <span className="text-[9px] font-medium uppercase leading-tight tracking-[0.3em] text-slate-600">
                   ART GALLERY
                 </span>
               </div>
@@ -99,8 +99,8 @@ export default function Header() {
                   to={link.to}
                   end={link.end}
                   className={({ isActive }) =>
-                    `text-xs uppercase tracking-[0.2em] transition-all duration-200 hover:text-luxury-black dark:hover:text-dark-text ${
-                      isActive ? "text-luxury-black font-medium dark:text-dark-text" : "text-muted-grey dark:text-dark-muted"
+                    `text-xs uppercase tracking-[0.2em] transition-all duration-200 hover:text-slate-900 ${
+                      isActive ? "font-medium text-slate-900" : "text-slate-600"
                     }`
                   }
                 >
@@ -116,8 +116,8 @@ export default function Header() {
                   to={link.to}
                   end={link.end}
                   className={({ isActive }) =>
-                    `text-xs uppercase tracking-[0.2em] transition-all duration-200 hover:text-luxury-black dark:hover:text-dark-text ${
-                      isActive ? "text-luxury-black font-medium dark:text-dark-text" : "text-muted-grey dark:text-dark-muted"
+                    `text-xs uppercase tracking-[0.2em] transition-all duration-200 hover:text-slate-900 ${
+                      isActive ? "font-medium text-slate-900" : "text-slate-600"
                     }`
                   }
                 >
@@ -130,13 +130,13 @@ export default function Header() {
                   type="button"
                   onClick={() => setAdminDropdownOpen((v) => !v)}
                   onMouseEnter={() => setAdminDropdownOpen(true)}
-                  className="flex items-center gap-1 text-xs uppercase tracking-[0.2em] text-muted-grey transition-all duration-200 hover:text-luxury-black dark:text-dark-muted dark:hover:text-dark-text"
+                  className="flex items-center gap-1 text-xs uppercase tracking-[0.2em] text-slate-600 transition-all duration-200 hover:text-slate-900"
                 >
                   <span>More</span>
                   <ChevronDownIcon className={`h-3 w-3 transition-transform duration-200 ${adminDropdownOpen ? "rotate-180" : ""}`} />
                 </button>
                 {adminDropdownOpen && (
-                  <div className="global-header absolute left-0 top-full mt-2 w-48 rounded-xl border border-soft-grey/40 p-2 shadow-xl dark:border-dark-border">
+                  <div className="absolute left-0 top-full mt-2 w-48 rounded-xl border border-black/10 bg-white/95 p-2 shadow-xl backdrop-blur-md">
                     {ADMIN_SECONDARY_LINKS.map((link) => (
                       <NavLink
                         key={link.to}
@@ -145,8 +145,8 @@ export default function Header() {
                         className={({ isActive }) =>
                           `block rounded-lg px-3 py-2 text-[11px] uppercase tracking-[0.15em] transition-all duration-200 ${
                             isActive
-                              ? "bg-luxury-black text-pure-white dark:bg-dark-accent dark:text-luxury-black"
-                              : "text-muted-grey hover:bg-soft-grey/20 hover:text-luxury-black dark:text-dark-muted dark:hover:bg-dark-elevated dark:hover:text-dark-text"
+                              ? "bg-slate-100 font-medium text-slate-900"
+                              : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                           }`
                         }
                       >
@@ -157,11 +157,11 @@ export default function Header() {
                 )}
               </div>
 
-              <span className="h-4 w-px bg-soft-grey/40 dark:bg-dark-border" />
+              <span className="h-4 w-p-px bg-black/10" />
 
               <Link
                 to="/"
-                className="text-xs uppercase tracking-[0.2em] text-muted-grey transition-all duration-200 hover:text-luxury-black dark:text-dark-muted dark:hover:text-dark-text"
+                className="text-xs uppercase tracking-[0.2em] text-slate-600 transition-all duration-200 hover:text-slate-900"
               >
                 ← Store
               </Link>
@@ -175,7 +175,7 @@ export default function Header() {
             type="button"
             onClick={() => setSearchOpen((v) => !v)}
             aria-label="Search"
-            className="flex h-10 w-10 items-center justify-center text-muted-grey transition-all duration-200 hover:text-luxury-black dark:text-dark-muted dark:hover:text-dark-text"
+            className="flex h-10 w-10 items-center justify-center text-slate-600 transition-all duration-200 hover:text-slate-900"
           >
             <SearchIcon />
           </button>
@@ -185,16 +185,16 @@ export default function Header() {
           <Link
             to="/account"
             aria-label="Account"
-            className="hidden h-10 w-10 items-center justify-center text-muted-grey transition-all duration-200 hover:text-luxury-black dark:text-dark-muted dark:hover:text-dark-text sm:flex"
+            className="hidden h-10 w-10 items-center justify-center text-slate-600 transition-all duration-200 hover:text-slate-900 sm:flex"
           >
             <UserIcon />
           </Link>
 
           {!isAdminRoute && (
-            <Link to="/cart" aria-label="Cart" className="relative flex h-10 w-10 items-center justify-center text-muted-grey transition-all duration-200 hover:text-luxury-black dark:text-dark-muted dark:hover:text-dark-text">
+            <Link to="/cart" aria-label="Cart" className="relative flex h-10 w-10 items-center justify-center text-slate-600 transition-all duration-200 hover:text-slate-900">
               <CartIcon />
               {count > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-luxury-black text-[9px] font-medium text-pure-white dark:bg-dark-accent dark:text-luxury-black">
+                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-slate-200 text-[9px] font-medium text-slate-900">
                   {count}
                 </span>
               )}
@@ -205,7 +205,7 @@ export default function Header() {
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
-            className="flex h-10 w-10 items-center justify-center text-muted-grey transition-all duration-200 hover:text-luxury-black dark:text-dark-muted dark:hover:text-dark-text lg:hidden"
+            className="flex h-10 w-10 items-center justify-center text-slate-600 transition-all duration-200 hover:text-slate-900 lg:hidden"
           >
             {menuOpen ? <CloseIcon /> : <MenuIcon />}
           </button>
@@ -214,16 +214,16 @@ export default function Header() {
 
       {/* SEARCH PANEL */}
       {searchOpen && (
-        <div className="global-header border-b border-soft-grey/40 px-5 py-3.5 shadow-sm dark:border-dark-border sm:px-8">
+        <div className="border-b border-black/10 bg-white/80 px-5 py-3.5 shadow-sm backdrop-blur-md sm:px-8">
           <form onSubmit={handleSearchSubmit} className="mx-auto flex max-w-7xl items-center gap-3">
             <input
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search artworks, paintings, and masterworks..."
-              className="w-full border-b border-soft-grey/60 bg-transparent py-2 text-sm text-luxury-black outline-none placeholder:text-muted-grey dark:border-dark-border dark:text-dark-text"
+              className="w-full border-b border-black/10 bg-transparent py-2 text-sm text-slate-900 outline-none placeholder:text-slate-500"
             />
-            <button type="submit" className="text-xs font-medium uppercase tracking-widest text-luxury-black dark:text-dark-text">
+            <button type="submit" className="text-xs font-medium uppercase tracking-widest text-slate-900">
               Search
             </button>
           </form>
@@ -232,7 +232,7 @@ export default function Header() {
 
       {/* MOBILE MENU DROPDOWN */}
       {menuOpen && (
-        <div className="global-header max-h-[80vh] overflow-y-auto border-b border-soft-grey/40 px-5 py-6 shadow-xl dark:border-dark-border lg:hidden">
+        <div className="max-h-[80vh] overflow-y-auto border-b border-black/10 bg-white/90 px-5 py-6 text-slate-900 shadow-xl backdrop-blur-md lg:hidden">
           <div className="flex flex-col gap-4">
             {!isAdminRoute ? (
               <>
@@ -244,7 +244,7 @@ export default function Header() {
                     onClick={() => setMenuOpen(false)}
                     className={({ isActive }) =>
                       `text-sm uppercase tracking-[0.2em] transition-colors duration-200 ${
-                        isActive ? "text-luxury-black font-medium dark:text-dark-text" : "text-muted-grey dark:text-dark-muted"
+                        isActive ? "font-medium text-slate-900" : "text-slate-600"
                       }`
                     }
                   >
@@ -254,8 +254,8 @@ export default function Header() {
               </>
             ) : (
               <>
-                <div className="mb-2 pb-2 border-b border-soft-grey/30 dark:border-dark-border">
-                  <span className="text-[10px] uppercase tracking-[0.3em] text-muted-grey dark:text-dark-muted">Admin Dashboard</span>
+                <div className="mb-2 border-b border-black/10 pb-2">
+                  <span className="text-[10px] uppercase tracking-[0.3em] text-slate-600">Admin Dashboard</span>
                 </div>
                 {ADMIN_PRIMARY_LINKS.map((link) => (
                   <NavLink
@@ -265,7 +265,7 @@ export default function Header() {
                     onClick={() => setMenuOpen(false)}
                     className={({ isActive }) =>
                       `text-sm uppercase tracking-[0.2em] transition-colors duration-200 ${
-                        isActive ? "text-luxury-black font-medium dark:text-dark-text" : "text-muted-grey dark:text-dark-muted"
+                        isActive ? "font-medium text-slate-900" : "text-slate-600"
                       }`
                     }
                   >
@@ -279,7 +279,7 @@ export default function Header() {
                     onClick={() => setMenuOpen(false)}
                     className={({ isActive }) =>
                       `text-sm uppercase tracking-[0.2em] transition-colors duration-200 ${
-                        isActive ? "text-luxury-black font-medium dark:text-dark-text" : "text-muted-grey dark:text-dark-muted"
+                        isActive ? "font-medium text-slate-900" : "text-slate-600"
                       }`
                     }
                   >
@@ -289,18 +289,18 @@ export default function Header() {
                 <Link
                   to="/"
                   onClick={() => setMenuOpen(false)}
-                  className="mt-2 pt-2 border-t border-soft-grey/30 text-sm uppercase tracking-[0.2em] text-muted-grey transition-colors duration-200 hover:text-luxury-black dark:border-dark-border dark:text-dark-muted dark:hover:text-dark-text"
+                  className="mt-2 border-t border-black/10 pt-2 text-sm uppercase tracking-[0.2em] text-slate-600 transition-colors duration-200 hover:text-slate-900"
                 >
                   ← Back to Store
                 </Link>
               </>
             )}
 
-            <div className="mt-4 flex flex-col gap-3 pt-4 border-t border-soft-grey/30 dark:border-dark-border">
+            <div className="mt-4 flex flex-col gap-3 border-t border-black/10 pt-4">
               <Link
                 to="/account"
                 onClick={() => setMenuOpen(false)}
-                className="text-xs uppercase tracking-[0.2em] text-luxury-black dark:text-dark-text"
+                className="text-xs uppercase tracking-[0.2em] text-slate-900"
               >
                 {user ? appUser?.display_name || "My Account" : "Login / Signup"}
               </Link>
@@ -317,7 +317,7 @@ export default function Header() {
                 </button>
               )}
               <div className="flex items-center justify-between pt-2">
-                <span className="text-xs uppercase tracking-widest text-muted-grey dark:text-dark-muted">Theme</span>
+                <span className="text-xs uppercase tracking-widest text-slate-600">Theme</span>
                 <ThemeToggle />
               </div>
             </div>

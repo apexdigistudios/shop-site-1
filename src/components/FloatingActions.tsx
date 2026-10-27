@@ -34,7 +34,7 @@ export default function FloatingActions() {
   return (
     <>
       {/* LEFT UTILITY STACK — refresh + back */}
-      <div className="fixed bottom-4 left-4 z-[60] flex flex-col gap-3 sm:bottom-5 sm:left-5">
+      <div className="fixed bottom-4 left-4 z-60 flex flex-col gap-3 sm:bottom-5 sm:left-5">
         <button
           type="button"
           aria-label="Refresh page"
@@ -59,7 +59,7 @@ export default function FloatingActions() {
       </div>
 
       {/* RIGHT STACK — WhatsApp (top) above Back-to-top (bottom) */}
-      <div className="fixed bottom-4 right-4 z-[60] flex flex-col items-end gap-3 sm:bottom-5 sm:right-5">
+      <div className="fixed bottom-4 right-4 z-60 flex flex-col items-end gap-3 sm:bottom-5 sm:right-5">
         <a
           href={WHATSAPP_URL}
           target="_blank"

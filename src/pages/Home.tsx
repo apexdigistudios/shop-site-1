@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabase";
 import type { Category, HomeText, Product, Testimonial } from "../lib/types";
 import ProductCard from "../components/ProductCard";
 import EmptyState from "../components/EmptyState";
+import Hero from "../components/Hero";
 import { safeImages } from "../lib/helpers";
 
 export default function Home() {
@@ -44,33 +45,7 @@ export default function Home() {
 
   return (
     <div>
-      {/* HERO */}
-      <section className="relative flex min-h-[calc(100vh-76px)] items-center justify-center overflow-hidden bg-[#fafafc] text-slate-900">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,rgba(226,232,240,0.75),transparent_65%)]" />
-        <div className="absolute inset-x-[12%] top-[14%] h-[72%] border border-slate-200/70" />
-        <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
-          <p className="mb-6 text-[11px] uppercase tracking-[0.5em] text-slate-600 animate-fade-up">
-            ORIGINAL ARTWORKS BY CHRISTY BLACK
-          </p>
-          <h1 className="font-display text-5xl font-medium leading-[1.05] tracking-wide text-slate-900 sm:text-6xl md:text-7xl lg:text-8xl animate-fade-up">
-            {homeText?.hero_title || "The Christy Black Art Gallery"}
-          </h1>
-          <p className="mx-auto mt-7 max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base animate-fade-up">
-            {homeText?.hero_subtitle || "Discover original paintings and masterworks by Christy Black."}
-          </p>
-          <div className="mt-12 animate-fade-up">
-            <Link
-              to="/shop"
-              className="inline-flex h-12 items-center rounded-full bg-slate-900 px-10 text-xs uppercase tracking-[0.3em] text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-slate-700"
-            >
-              Explore the Collection
-            </Link>
-          </div>
-        </div>
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.35em] text-slate-500">
-          Scroll to Discover
-        </div>
-      </section>
+      <Hero />
 
       {/* ABOUT */}
       <section className="bg-pure-white py-24 transition-theme dark:bg-dark-card">

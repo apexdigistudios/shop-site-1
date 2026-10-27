@@ -55,7 +55,7 @@ export default function Footer() {
             rel="noreferrer"
             className="font-medium text-luxury-black/70 transition-colors duration-200 hover:text-luxury-black dark:text-dark-text/60 dark:hover:text-dark-text"
           >
-            WEBQIX
+            ADJACENT
           </a>
         </p>
       </div>
