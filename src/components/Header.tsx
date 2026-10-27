@@ -4,6 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useCart } from "../contexts/CartContext";
 import { SearchIcon, UserIcon, CartIcon, MenuIcon, CloseIcon, ChevronDownIcon } from "./icons";
 import { useBranding } from "../contexts/BrandingContext";
+import { formatCompactNumber } from "../lib/helpers";
 
 const STORE_LINKS = [
   { to: "/", label: "Home", end: true },
@@ -230,22 +231,24 @@ export default function Header() {
               <CartIcon />
               {count > 0 && (
                 <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-slate-900 text-[9px] font-medium text-white shadow">
-                  {count}
+                  {formatCompactNumber(count)}
                 </span>
               )}
             </Link>
           )}
 
-          <button
-            type="button"
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-            className={`flex h-10 w-10 items-center justify-center transition-all duration-200 lg:hidden ${
-              isHome && !isScrolled ? "text-white hover:opacity-80 drop-shadow" : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            {menuOpen ? <CloseIcon /> : <MenuIcon />}
-          </button>
+          {!isAdminRoute && (
+            <button
+              type="button"
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              className={`flex h-10 w-10 items-center justify-center transition-all duration-200 lg:hidden ${
+                isHome && !isScrolled ? "text-white hover:opacity-80 drop-shadow" : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              {menuOpen ? <CloseIcon /> : <MenuIcon />}
+            </button>
+          )}
         </div>
       </div>
 
@@ -268,7 +271,7 @@ export default function Header() {
       )}
 
       {/* MOBILE MENU DROPDOWN */}
-      {menuOpen && (
+      {menuOpen && !isAdminRoute && (
         <div className="max-h-[80vh] overflow-y-auto border-b border-black/10 bg-white/95 px-5 py-6 text-slate-900 shadow-xl backdrop-blur-md lg:hidden">
           <div className="flex flex-col gap-4">
             {!isAdminRoute ? (

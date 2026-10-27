@@ -7,6 +7,41 @@ export function formatPrice(value: number | null | undefined): string {
   }).format(n);
 }
 
+export function formatCompactNumber(value: number | string): string {
+  const num = typeof value === "number" ? value : Number(value.replace(/,/g, "").trim());
+  if (!Number.isFinite(num)) return String(value);
+
+  const absolute = Math.abs(num);
+  const units = [
+    { threshold: 1_000_000_000_000, suffix: "T" },
+    { threshold: 1_000_000_000, suffix: "B" },
+    { threshold: 1_000_000, suffix: "M" },
+    { threshold: 1_000, suffix: "k" },
+  ];
+
+  for (const { threshold, suffix } of units) {
+    if (absolute >= threshold) {
+      return `${(num / threshold).toFixed(1).replace(/\.0$/, "")}${suffix}`;
+    }
+  }
+  return String(num);
+}
+
+export function formatCompactPrice(value: number | string | null | undefined): string {
+  const amount = value == null ? 0 : typeof value === "number" ? value : Number(value.replace(/,/g, "").trim());
+  if (!Number.isFinite(amount)) return "—";
+  if (Math.abs(amount) < 1_000) return formatPrice(amount);
+
+  const currencySymbol = new Intl.NumberFormat("en-GH", {
+    style: "currency",
+    currency: "GHS",
+  })
+    .formatToParts(0)
+    .find((part) => part.type === "currency")?.value;
+
+  return `${currencySymbol || "GHS"}${formatCompactNumber(amount)}`;
+}
+
 export function paystackAmount(total: number): number {
   // Paystack expects the amount in the smallest currency unit (pesewas for GHS).
   return Math.max(0, Math.round(total * 100));
@@ -48,6 +83,6 @@ export function timeAgo(dateStr: string): string {
 
 export const WHATSAPP_NUMBER = "233548648357";
 
-export function buildWhatsappOrderLink(message: string): string {
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+export function buildWhatsappOrderLink(): string {
+  return `https://wa.me/${WHATSAPP_NUMBER}`;
 }

@@ -14,7 +14,7 @@ export default function Footer() {
             Original paintings and masterworks by Christy Black, curated for collectors and art lovers.
           </p>
           <a
-            href={buildWhatsappOrderLink("Hello The Christy Black Art Gallery, I'd like to inquire about an artwork.")}
+            href={buildWhatsappOrderLink()}
             target="_blank"
             rel="noreferrer"
             aria-label="Chat on WhatsApp"

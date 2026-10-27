@@ -53,7 +53,7 @@ export default function CategoryPage() {
         {category?.image && (
           <img src={category.image} alt={category.name} className="absolute inset-0 h-full w-full object-cover opacity-60" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-deep-black/90 via-deep-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-deep-black/90 via-deep-black/30 to-transparent" />
         <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-8 sm:px-8">
           <h1 className="font-display text-4xl tracking-wide text-pure-white">{category?.name || "Collection"}</h1>
           {category?.description && <p className="mt-2 max-w-xl text-sm text-soft-grey">{category.description}</p>}
@@ -64,7 +64,7 @@ export default function CategoryPage() {
         {loading ? (
           <div className="grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="aspect-[3/4] w-full animate-pulse rounded-2xl bg-beige-cream dark:bg-dark-grey" />
+              <div key={i} className="aspect-3/4 w-full animate-pulse rounded-2xl bg-beige-cream dark:bg-dark-grey" />
             ))}
           </div>
         ) : products.length === 0 ? (

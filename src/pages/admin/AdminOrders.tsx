@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import type { MeetupStatus, Order, OrderStatus } from "../../lib/types";
-import { formatPrice, WHATSAPP_NUMBER } from "../../lib/helpers";
+import { formatCompactNumber, formatCompactPrice, WHATSAPP_NUMBER } from "../../lib/helpers";
 import { useToast } from "../../contexts/ToastContext";
 import { WhatsAppIcon, BagIcon, ChevronDownIcon } from "../../components/icons";
 import AdminSectionHeader from "../../components/AdminSectionHeader";
@@ -100,7 +100,7 @@ export default function AdminOrders() {
       <AdminSectionHeader
         emoji="🛒"
         title="Orders"
-        subtitle={`${orders.length} total order${orders.length !== 1 ? "s" : ""}`}
+        subtitle={`${formatCompactNumber(orders.length)} total order${orders.length !== 1 ? "s" : ""}`}
       />
 
       {/* FILTER TABS */}
@@ -124,7 +124,7 @@ export default function AdminOrders() {
           >
             {label}
             <span className={`rounded-full px-1.5 text-[10px] ${filter === key ? "bg-white/20" : "bg-soft-grey/30 dark:bg-dark-elevated"}`}>
-              {count}
+              {formatCompactNumber(count)}
             </span>
           </button>
         ))}
@@ -168,7 +168,7 @@ export default function AdminOrders() {
                       {order.status.replace(/_/g, " ")}
                     </span>
                     <span className="text-base font-semibold text-luxury-black dark:text-dark-text">
-                      {formatPrice(order.total_amount ?? order.total ?? 0)}
+                      {formatCompactPrice(order.total_amount ?? order.total ?? 0)}
                     </span>
                   </div>
                 </div>
@@ -211,15 +211,15 @@ export default function AdminOrders() {
                       </div>
                       <div className="flex justify-between text-xs text-muted-grey dark:text-dark-muted">
                         <span>Total</span>
-                        <span className="text-luxury-black dark:text-dark-text">{formatPrice(order.total_amount ?? order.total ?? 0)}</span>
+                        <span className="text-luxury-black dark:text-dark-text">{formatCompactPrice(order.total_amount ?? order.total ?? 0)}</span>
                       </div>
                       <div className="flex justify-between text-xs text-muted-grey dark:text-dark-muted">
                         <span>Deposit</span>
-                        <span className="text-whatsapp-green">{formatPrice(order.deposit_amount ?? 0)}</span>
+                        <span className="text-whatsapp-green">{formatCompactPrice(order.deposit_amount ?? 0)}</span>
                       </div>
                       <div className="flex justify-between text-xs text-muted-grey dark:text-dark-muted">
                         <span>Balance</span>
-                        <span className="text-alert-red">{formatPrice(order.remaining_balance ?? 0)}</span>
+                        <span className="text-alert-red">{formatCompactPrice(order.remaining_balance ?? 0)}</span>
                       </div>
                     </div>
                   </div>
@@ -229,7 +229,7 @@ export default function AdminOrders() {
                 {isExpanded && safeItems.length > 0 && (
                   <div className="border-t border-soft-grey/30 p-5 dark:border-dark-border">
                     <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-grey dark:text-dark-muted">
-                      Items ({safeItems.length})
+                      Items ({formatCompactNumber(safeItems.length)})
                     </p>
                     <div className="space-y-2.5">
                       {safeItems.map((it, idx) => (
@@ -244,13 +244,13 @@ export default function AdminOrders() {
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm text-luxury-black dark:text-dark-text">{it.name}</p>
                             <p className="text-xs text-muted-grey dark:text-dark-muted">
-                              Qty {it.quantity}
+                              Qty {formatCompactNumber(it.quantity)}
                               {it.size ? ` · ${it.size}` : ""}
                               {it.color ? ` · ${it.color}` : ""}
                             </p>
                           </div>
                           <span className="flex-shrink-0 text-sm font-medium text-luxury-black dark:text-dark-text">
-                            {formatPrice(it.price * it.quantity)}
+                            {formatCompactPrice(it.price * it.quantity)}
                           </span>
                         </div>
                       ))}

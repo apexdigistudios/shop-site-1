@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import type { Review } from "../../lib/types";
 import { useToast } from "../../contexts/ToastContext";
-import { timeAgo } from "../../lib/helpers";
+import { formatCompactNumber, timeAgo } from "../../lib/helpers";
 import AdminSectionHeader from "../../components/AdminSectionHeader";
 
 export default function AdminReviews() {
@@ -58,7 +58,11 @@ export default function AdminReviews() {
 
   return (
     <div>
-      <AdminSectionHeader emoji="⭐" title="Reviews" subtitle={`${reviews.length} review${reviews.length !== 1 ? "s" : ""}`} />
+      <AdminSectionHeader
+        emoji="⭐"
+        title="Reviews"
+        subtitle={`${formatCompactNumber(reviews.length)} review${reviews.length !== 1 ? "s" : ""}`}
+      />
 
       <div className="mt-8">
         {loading ? (

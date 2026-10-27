@@ -71,8 +71,8 @@ function AppRoutes() {
           path="*"
           element={
             <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
-              <h1 className="font-display text-5xl text-luxury-black dark:text-pure-white">404</h1>
-              <p className="mt-3 text-sm text-muted-grey">This page could not be found.</p>
+              <h1 className="font-display text-5xl text-slate-900">404</h1>
+              <p className="mt-3 text-sm text-slate-500">This page could not be found.</p>
             </div>
           }
         />

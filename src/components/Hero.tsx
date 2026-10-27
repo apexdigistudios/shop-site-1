@@ -6,9 +6,7 @@ interface HeroProps {
 }
 
 export default function Hero({ }: HeroProps) {
-  const privateViewingLink = buildWhatsappOrderLink(
-    "Hello, I would like to arrange a private viewing at The Christy Black Art Gallery."
-  );
+  const privateViewingLink = buildWhatsappOrderLink();
 
   return (
     <section className="relative bg-slate-900 px-5 py-32 text-white sm:px-8 sm:py-40">

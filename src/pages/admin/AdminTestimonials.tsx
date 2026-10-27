@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase, IMAGES_BUCKET } from "../../lib/supabase";
 import type { Testimonial } from "../../lib/types";
 import { useToast } from "../../contexts/ToastContext";
+import { formatCompactNumber } from "../../lib/helpers";
 import AdminSectionHeader from "../../components/AdminSectionHeader";
 
 interface FormState {
@@ -105,7 +106,7 @@ export default function AdminTestimonials() {
       <AdminSectionHeader
         emoji="💬"
         title="Testimonials"
-        subtitle={`${testimonials.length} testimonial${testimonials.length !== 1 ? "s" : ""}`}
+        subtitle={`${formatCompactNumber(testimonials.length)} testimonial${testimonials.length !== 1 ? "s" : ""}`}
         action={
           <button
             onClick={() => {

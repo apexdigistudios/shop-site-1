@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase, IMAGES_BUCKET } from "../../lib/supabase";
 import type { Category } from "../../lib/types";
 import { useToast } from "../../contexts/ToastContext";
+import { formatCompactNumber } from "../../lib/helpers";
 import AdminSectionHeader from "../../components/AdminSectionHeader";
 
 interface CategoryFormState {
@@ -122,7 +123,7 @@ export default function AdminCategories() {
       <AdminSectionHeader
         emoji="🗂️"
         title="Collections"
-        subtitle={`${categories.length} collection${categories.length !== 1 ? "s" : ""}`}
+        subtitle={`${formatCompactNumber(categories.length)} collection${categories.length !== 1 ? "s" : ""}`}
         action={
           <button
             onClick={openNewForm}

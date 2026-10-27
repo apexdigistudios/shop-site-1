@@ -3,6 +3,7 @@ import { supabase } from "../../lib/supabase";
 import type { AppUser, UserRole } from "../../lib/types";
 import { useToast } from "../../contexts/ToastContext";
 import { useAuth } from "../../contexts/AuthContext";
+import { formatCompactNumber } from "../../lib/helpers";
 import AdminSectionHeader from "../../components/AdminSectionHeader";
 
 export default function AdminUsers() {
@@ -52,7 +53,7 @@ export default function AdminUsers() {
       <AdminSectionHeader
         emoji="👥"
         title="Users"
-        subtitle={`${users.length} registered user${users.length !== 1 ? "s" : ""}`}
+        subtitle={`${formatCompactNumber(users.length)} registered user${users.length !== 1 ? "s" : ""}`}
         action={
           <input
             value={search}

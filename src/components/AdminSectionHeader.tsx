@@ -12,7 +12,7 @@ export default function AdminSectionHeader({ emoji, title, subtitle, action }: A
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="flex items-center gap-3.5">
         <span
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-soft-grey/40 bg-pure-white text-2xl leading-none transition-theme dark:border-dark-border dark:bg-dark-elevated"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50/70 text-2xl leading-none transition-theme dark:border-dark-border dark:bg-dark-elevated"
           aria-hidden="true"
         >
           {emoji}

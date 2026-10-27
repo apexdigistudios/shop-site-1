@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase, IMAGES_BUCKET } from "../../lib/supabase";
 import type { ArtworkAvailability, Category, Product, Visibility } from "../../lib/types";
-import { formatPrice, safeImages, slugify } from "../../lib/helpers";
+import { formatCompactNumber, formatCompactPrice, safeImages, slugify } from "../../lib/helpers";
 import { useToast } from "../../contexts/ToastContext";
 import AdminSectionHeader from "../../components/AdminSectionHeader";
 
@@ -197,7 +197,7 @@ export default function AdminProducts() {
       <AdminSectionHeader
         emoji="📦"
         title="Artworks"
-        subtitle={`${products.length} artwork${products.length !== 1 ? "s" : ""}`}
+        subtitle={`${formatCompactNumber(products.length)} artwork${products.length !== 1 ? "s" : ""}`}
         action={
           <button
             onClick={openNewForm}
@@ -417,7 +417,7 @@ export default function AdminProducts() {
                         </div>
                       </td>
                       <td className="px-4 py-3">{product.title || product.name}</td>
-                      <td className="px-4 py-3">{formatPrice(product.price)}</td>
+                      <td className="px-4 py-3">{formatCompactPrice(product.price)}</td>
                       <td className="px-4 py-3">{product.availability_status}</td>
                       <td className="px-4 py-3">{product.medium || "—"}</td>
                       <td className="px-4 py-3">{product.visibility ? "Visible" : "Hidden"}</td>

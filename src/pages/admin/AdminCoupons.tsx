@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import type { Coupon } from "../../lib/types";
 import { useToast } from "../../contexts/ToastContext";
+import { formatCompactNumber } from "../../lib/helpers";
 import AdminSectionHeader from "../../components/AdminSectionHeader";
 
 interface CouponFormState {
@@ -105,7 +106,7 @@ export default function AdminCoupons() {
       <AdminSectionHeader
         emoji="🎟️"
         title="Coupons"
-        subtitle={`${coupons.length} coupon${coupons.length !== 1 ? "s" : ""}`}
+        subtitle={`${formatCompactNumber(coupons.length)} coupon${coupons.length !== 1 ? "s" : ""}`}
         action={
           <button
             onClick={() => {
@@ -181,7 +182,7 @@ export default function AdminCoupons() {
                 {coupons.map((coupon) => (
                   <tr key={coupon.id} className="border-t border-border-ash dark:border-dark-grey">
                     <td className="px-4 py-3 font-medium">{coupon.code}</td>
-                    <td className="px-4 py-3">{coupon.discount}%</td>
+                    <td className="px-4 py-3">{formatCompactNumber(coupon.discount)}%</td>
                     <td className="px-4 py-3">
                       <button
                         onClick={() => toggleActive(coupon)}

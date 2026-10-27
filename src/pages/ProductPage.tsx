@@ -176,7 +176,6 @@ export default function ProductPage() {
 
   const images = safeImages(product.images);
   const soldOut = product.availability_status !== "Available" || product.stock_status === "out_of_stock";
-  const whatsappMessage = `Hello, I'm interested in "${product.title || product.name}" by ${product.artist || "Christy Black"} (${formatPrice(product.price)}). Is it available?`;
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
@@ -275,7 +274,7 @@ export default function ProductPage() {
           </div>
 
           <a
-            href={buildWhatsappOrderLink(whatsappMessage)}
+            href={buildWhatsappOrderLink()}
             target="_blank"
             rel="noreferrer"
             aria-label="Chat on WhatsApp"

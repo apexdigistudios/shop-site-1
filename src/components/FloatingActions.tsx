@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeftIcon, ArrowUpIcon, RefreshIcon, WhatsAppIcon } from "./icons";
-import { WHATSAPP_NUMBER } from "../lib/helpers";
 
-const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
+const WHATSAPP_URL = "https://wa.me/233548648357";
 
 export default function FloatingActions() {
   const location = useLocation();
   const navigate = useNavigate();
   const isHome = location.pathname === "/";
+  const [isScrolled, setIsScrolled] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
 
   useEffect(() => {
     function onScroll() {
+      setIsScrolled(window.scrollY > 30);
       setShowBackToTop(window.scrollY > 400);
     }
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -30,11 +31,14 @@ export default function FloatingActions() {
   // Authentic WhatsApp brand styling: #25D366 bg, white icon, darker green hover.
   const whatsappBtn =
     "bg-[#25D366] text-white shadow-[0_6px_20px_rgba(37,211,102,0.35)] hover:bg-[#1EBE5A] focus-visible:ring-[#25D366]";
+  const fadeClasses = isScrolled
+    ? "opacity-0 pointer-events-none translate-y-4"
+    : "opacity-100 translate-y-0";
 
   return (
     <>
       {/* LEFT UTILITY STACK — refresh + back */}
-      <div className="fixed bottom-4 left-4 z-60 flex flex-col gap-3 sm:bottom-5 sm:left-5">
+      <div className={`fixed bottom-4 left-4 z-60 flex flex-col gap-3 transition-all duration-300 sm:bottom-5 sm:left-5 ${fadeClasses}`}>
         <button
           type="button"
           aria-label="Refresh page"
@@ -59,7 +63,7 @@ export default function FloatingActions() {
       </div>
 
       {/* RIGHT STACK — WhatsApp (top) above Back-to-top (bottom) */}
-      <div className="fixed bottom-4 right-4 z-60 flex flex-col items-end gap-3 sm:bottom-5 sm:right-5">
+      <div className={`fixed bottom-4 right-4 z-60 flex flex-col items-end gap-3 transition-all duration-300 sm:bottom-5 sm:right-5 ${fadeClasses}`}>
         <a
           href={WHATSAPP_URL}
           target="_blank"
