@@ -109,33 +109,35 @@ export default function Shop() {
 
       {/* Filter and Control Bar */}
       <div className="flex flex-col gap-4 border-y border-slate-200 py-4">
-        {/* Horizontal Scrollable Categories Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none shrink-0">
-          <button
-            type="button"
-            onClick={() => updateParam("category", "")}
-            className={`shrink-0 rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all shadow-xs ${
-              !categoryFilter
-                ? "border-slate-900 bg-slate-900 text-white"
-                : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-            }`}
-          >
-            All Collections
-          </button>
-          {categories.map((cat) => (
+        {/* Horizontal Scrollable Categories Pills (Fully accessible and unhidden on mobile) */}
+        <div className="w-full overflow-x-auto pb-2 scrollbar-none [-webkit-overflow-scrolling:touch]">
+          <div className="flex items-center gap-2 min-w-max px-1">
             <button
-              key={cat.id}
               type="button"
-              onClick={() => updateParam("category", cat.id)}
+              onClick={() => updateParam("category", "")}
               className={`shrink-0 rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all shadow-xs ${
-                categoryFilter === cat.id
+                !categoryFilter
                   ? "border-slate-900 bg-slate-900 text-white"
                   : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
               }`}
             >
-              {cat.name}
+              All Collections
             </button>
-          ))}
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => updateParam("category", cat.id)}
+                className={`shrink-0 rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all shadow-xs ${
+                  categoryFilter === cat.id
+                    ? "border-slate-900 bg-slate-900 text-white"
+                    : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Secondary Controls: Search, Medium Filter, and Sort */}
